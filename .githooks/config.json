@@ -1,0 +1,6 @@
+{
+    "config": {
+        "commitMessageRegex": "^(?:Revert \"(?:.+)\")|^((?:PSG-[0-9]+|N\\/A):\\s(\\[[a-zA-Z]*\\]\\s)?.*)|^(Merge .*)",
+        "commitMessageComment": "Commit message does not follow the pattern '^(?:Revert \"(?:.+)\")|^((?:PSG-[0-9]+|N\\/A):\\s(\\[[a-zA-Z]*\\]\\s)?.*)|^(Merge .*)'"
+    }
+}

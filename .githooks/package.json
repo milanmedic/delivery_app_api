@@ -1,0 +1,16 @@
+{
+  "name": "pusgs-githooks",
+  "version": "1.0.0",
+  "description": "Git Hooks scripts and hooks used for setting up project workflow",
+  "main": "index.js",
+  "config": {
+    "commitMessageRegex": "^(?:Revert \"(?:.+)\")|^((?:PSG-[0-9]+|N\\/A):\\s(\\[[a-zA-Z]*\\]\\s)?.*)|^(Merge .*)",
+    "commitMessageComment": "Commit message does not follow the pattern '^(?:Revert \"(?:.+)\")|^((?:PSG-[0-9]+|N\\/A):\\s(\\[[a-zA-Z]*\\]\\s)?.*)|^(Merge .*)'"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "enable_hooks": "git config core.hookspath ./.githooks && chmod +x commit-msg && chmod +x pre-commit"
+  },
+  "author": "",
+  "license": "ISC"
+}
