@@ -5,3 +5,7 @@ import usersqldb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_
 type UserRepository struct {
 	db usersqldb.UserDber
 }
+
+func CreateUserRepository(db usersqldb.UserDber) *UserRepository {
+	return &UserRepository{db: db}
+}

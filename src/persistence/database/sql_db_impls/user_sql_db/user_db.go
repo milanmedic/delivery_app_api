@@ -12,7 +12,7 @@ func CreateUserDb(dbDriver *dbdrivers.DeliveryAppDb) *UserDb {
 	return &UserDb{dbDriver: dbDriver}
 }
 
-func (udb *UserDb) GetUser(id string) error {
+func (udb *UserDb) GetById(id string) error {
 	return nil
 }
 
