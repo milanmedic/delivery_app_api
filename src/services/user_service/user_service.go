@@ -4,6 +4,7 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	user_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/user_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 	"github.com/google/uuid"
 )
@@ -25,8 +26,11 @@ func (us *UserService) CreateUser(ud dto.UserInputDto) error {
 	user.SetName(ud.Name)
 	user.SetSurname(ud.Surname)
 	user.SetEmail(ud.Email)
-	//TODO: HASH PASSWORD BEFORE SAVING
-	user.SetPassword(ud.Password)
+	hash, err := security.HashPassword(ud.Password)
+	if err != nil {
+		return err
+	}
+	user.SetPassword(hash)
 	user.SetDateOfBirth(ud.DateOfBirth)
 	user.SetAddress(addr)
 	user.SetRole("CUSTOMER")
