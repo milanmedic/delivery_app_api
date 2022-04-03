@@ -1,6 +1,11 @@
 package usersqldb
 
 import (
+	"database/sql"
+	"fmt"
+	"reflect"
+	"strconv"
+
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	dbdrivers "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
 )
@@ -13,8 +18,73 @@ func CreateUserDb(dbDriver *dbdrivers.DeliveryAppDb) *UserDb {
 	return &UserDb{dbDriver: dbDriver}
 }
 
-func (udb *UserDb) GetBy(attr string, value interface{}) error {
-	return nil
+func getUnderlyingAsValue(data interface{}) reflect.Value {
+	return reflect.ValueOf(data)
+}
+
+func (udb *UserDb) GetBy(attr string, value interface{}) (*models.User, error) {
+	stmt, err := udb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
+	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE %s = ?;`, attr))
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var row *sql.Row
+
+	val := reflect.ValueOf(value)
+	ptr := val
+
+	switch ptr.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		concreteValue := strconv.FormatInt(ptr.Int(), 10)
+		row = stmt.QueryRow(concreteValue)
+	case reflect.String:
+		concreteValue := ptr.String()
+		row = stmt.QueryRow(concreteValue)
+	case reflect.Float32, reflect.Float64:
+		concreteValue := strconv.FormatFloat(ptr.Float(), 'f', 2, 32)
+		row = stmt.QueryRow(concreteValue)
+	case reflect.Bool:
+		concreteValue := strconv.FormatBool(ptr.Bool())
+		row = stmt.QueryRow(concreteValue)
+	}
+
+	var user *models.User = models.CreateUser()
+	var id string
+	var name string
+	var username string
+	var surname string
+	var email string
+	var password string
+	var dateOfBirth string
+	var addrId int
+	var role string
+	var status string
+	var city string
+	var street string
+	var streetNum int
+	var postfix string
+	err = row.Scan(&id, &username, &name, &surname, &email, &password, &dateOfBirth, &role, &status, &city, &street, &streetNum, &postfix, &addrId)
+	if err != nil {
+		return nil, nil
+	}
+
+	var addr *models.Address = models.CreateAddress(addrId, streetNum, city, street, postfix)
+
+	user.SetId(id)
+	user.SetName(name)
+	user.SetSurname(surname)
+	user.SetUsername(username)
+	user.SetEmail(email)
+	user.SetPassword(password)
+	user.SetDateOfBirth(dateOfBirth)
+	user.SetRole(role)
+	user.SetVerificationStatus(status)
+
+	user.SetAddress(addr)
+
+	return user, nil
 }
 
 func (udb *UserDb) AddOne(u models.User) error {

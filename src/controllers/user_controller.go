@@ -25,31 +25,53 @@ func (uc *UserController) Register(c *gin.Context) {
 	err := c.BindJSON(&userDto)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = uc.userService.ValidateUserRegistrationInput(userDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
+		c.String(http.StatusBadRequest, err.Error())
+		return
 	}
 
 	var addrId int
-	// IF address_id empty
-	// it means the address needs to be created
-	// create a new address, and retireve it's id
+
 	if userDto.Address.Id == 0 {
 		addrId, err = uc.addrService.CreateAddress(*userDto.Address)
 		if err != nil {
 			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
-			c.Status(http.StatusInternalServerError)
+			c.String(http.StatusInternalServerError, err.Error())
+			return
 		}
 	}
 
 	userDto.Address.Id = addrId
 
-	//TODO: CHECK IF USER EXISTS BEFORE CREATING A NEW USER
-
-	err = uc.userService.CreateUser(userDto)
+	exists, err := uc.userService.Exists(userDto.Email)
 	if err != nil {
-		c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
-		c.Status(http.StatusInternalServerError)
+		c.Error(fmt.Errorf("Error while checking for a customer. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if exists {
+		c.String(http.StatusBadRequest, "User with the provided email already exists")
+		return
+	}
+
+	if !exists {
+		err = uc.userService.CreateUser(userDto)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			c.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	c.Status(204)
+	return
 }
 
 func (uc *UserController) Login(c *gin.Context) {

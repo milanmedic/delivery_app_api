@@ -16,3 +16,7 @@ func CreateUserRepository(db usersqldb.UserDber) *UserRepository {
 func (ur *UserRepository) CreateUser(u models.User) error {
 	return ur.db.AddOne(u)
 }
+
+func (ur *UserRepository) GetUser(attr string, value interface{}) (*models.User, error) {
+	return ur.db.GetBy(attr, value)
+}
