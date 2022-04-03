@@ -1,6 +1,9 @@
 package userrepository
 
-import usersqldb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/user_sql_db"
+import (
+	"delivery_app_api.mmedic.com/m/v2/src/models"
+	usersqldb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/user_sql_db"
+)
 
 type UserRepository struct {
 	db usersqldb.UserDber
@@ -8,4 +11,8 @@ type UserRepository struct {
 
 func CreateUserRepository(db usersqldb.UserDber) *UserRepository {
 	return &UserRepository{db: db}
+}
+
+func (ur *UserRepository) CreateUser(u models.User) error {
+	return ur.db.AddOne(u)
 }
