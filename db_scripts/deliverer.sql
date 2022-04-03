@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS deliverer (
     "id" TEXT,
     "username" TEXT NOT NULL,
     "name" TEXT NOT NULL,
