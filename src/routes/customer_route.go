@@ -14,6 +14,7 @@ func SetupCustomerRoutes(router *gin.Engine, uc *customer_controller.CustomerCon
 	router.POST("/register", uc.Register)
 	router.POST("/login", uc.Login)
 	router.GET("/protected", authentication_utils.Authenticate(), HelloWorld)
+	router.GET("/refresh", authentication_utils.Authenticate(), authentication_utils.RefreshToken)
 }
 
 func HelloWorld(c *gin.Context) {

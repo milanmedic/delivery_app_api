@@ -1,10 +1,11 @@
 package security
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
-	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -30,16 +31,7 @@ func Authenticate() gin.HandlerFunc {
 
 		token := strings.Split(authHeader.IDToken, " ")[1]
 
-		claims := &jwt_utils.Claims{}
-
-		// Parse the JWT string and store the result in `claims`.
-		// Note that we are passing the key in this method as well. This method will return an error
-		// if the token is invalid (if it has expired according to the expiry time we set on sign in),
-		// or if the signature does not match
-		tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(env_utils.GetEnvVar("SECRET")), nil
-		})
-
+		valid, err := jwt_utils.ValidateToken(token)
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
 				c.Status(http.StatusUnauthorized)
@@ -49,11 +41,40 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		if !tkn.Valid {
+		if !valid {
 			c.Status(http.StatusUnauthorized)
 			return
 		}
 
 		c.Next()
 	}
+}
+
+func RefreshToken(c *gin.Context) {
+	authHeader := &AuthHeader{}
+
+	_ = c.ShouldBindHeader(&authHeader)
+	token := strings.Split(authHeader.IDToken, " ")[1]
+
+	_, claims, err := jwt_utils.ParseToken(token)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
+		c.Status(http.StatusInternalServerError)
+	}
+
+	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 24*time.Hour {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	// Now, create a new token for the current use, with a renewed expiration time
+	claims = jwt_utils.CreateClaims()
+	refreshedToken, err := jwt_utils.CreateToken(claims)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": refreshedToken})
+	return
 }
