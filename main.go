@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	customer_controller "delivery_app_api.mmedic.com/m/v2/src/controllers"
 	deliveryAppDb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
@@ -13,6 +12,7 @@ import (
 	customer_route "delivery_app_api.mmedic.com/m/v2/src/routes"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -56,7 +56,7 @@ func main() {
 
 	//**************************************************************************
 	// RUN SERVER
-	PORT := GetEnvVar("PORT")
+	PORT := env_utils.GetEnvVar("PORT")
 	err = router.Run(fmt.Sprintf(":%s", PORT))
 	HandleError(err)
 
@@ -66,10 +66,6 @@ func HandleError(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func GetEnvVar(key string) string {
-	return os.Getenv(key)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
