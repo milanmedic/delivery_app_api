@@ -10,20 +10,20 @@ import (
 	dbdrivers "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
 )
 
-type UserDb struct {
+type CustomerDb struct {
 	dbDriver *dbdrivers.DeliveryAppDb
 }
 
-func CreateUserDb(dbDriver *dbdrivers.DeliveryAppDb) *UserDb {
-	return &UserDb{dbDriver: dbDriver}
+func CreateCustomerDb(dbDriver *dbdrivers.DeliveryAppDb) *CustomerDb {
+	return &CustomerDb{dbDriver: dbDriver}
 }
 
 func getUnderlyingAsValue(data interface{}) reflect.Value {
 	return reflect.ValueOf(data)
 }
 
-func (udb *UserDb) GetBy(attr string, value interface{}) (*models.User, error) {
-	stmt, err := udb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
+func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, error) {
+	stmt, err := cdb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
 	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE %s = ?;`, attr))
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (udb *UserDb) GetBy(attr string, value interface{}) (*models.User, error) {
 		row = stmt.QueryRow(concreteValue)
 	}
 
-	var user *models.User = models.CreateUser()
+	var customer *models.Customer = models.CreateCustomer()
 	var id string
 	var name string
 	var username string
@@ -72,23 +72,23 @@ func (udb *UserDb) GetBy(attr string, value interface{}) (*models.User, error) {
 
 	var addr *models.Address = models.CreateAddress(addrId, streetNum, city, street, postfix)
 
-	user.SetId(id)
-	user.SetName(name)
-	user.SetSurname(surname)
-	user.SetUsername(username)
-	user.SetEmail(email)
-	user.SetPassword(password)
-	user.SetDateOfBirth(dateOfBirth)
-	user.SetRole(role)
-	user.SetVerificationStatus(status)
+	customer.SetId(id)
+	customer.SetName(name)
+	customer.SetSurname(surname)
+	customer.SetUsername(username)
+	customer.SetEmail(email)
+	customer.SetPassword(password)
+	customer.SetDateOfBirth(dateOfBirth)
+	customer.SetRole(role)
+	customer.SetVerificationStatus(status)
 
-	user.SetAddress(addr)
+	customer.SetAddress(addr)
 
-	return user, nil
+	return customer, nil
 }
 
-func (udb *UserDb) AddOne(u models.User) error {
-	tx, err := udb.dbDriver.Begin()
+func (cdb *CustomerDb) AddOne(u models.Customer) error {
+	tx, err := cdb.dbDriver.Begin()
 	if err != nil {
 		return err
 	}
@@ -113,10 +113,10 @@ func (udb *UserDb) AddOne(u models.User) error {
 	return nil
 }
 
-func (udb *UserDb) Update() error {
+func (cdb *CustomerDb) Update() error {
 	return nil
 }
 
-func (udb *UserDb) Delete() error {
+func (cdb *CustomerDb) Delete() error {
 	return nil
 }

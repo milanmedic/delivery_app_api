@@ -18,6 +18,10 @@ func (ar *AddrRepository) CreateAddr(a dto.AddressInputDto) (int, error) {
 	return ar.db.AddOne(a)
 }
 
+func (ar *AddrRepository) GetAddr(a dto.AddressInputDto) (*models.Address, error) {
+	return ar.db.GetAddr(a)
+}
+
 func (ar *AddrRepository) GetById(id string) (*models.Address, error) {
 	return ar.db.GetByID(id)
 }

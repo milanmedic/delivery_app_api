@@ -8,4 +8,5 @@ import (
 type AddrServicer interface {
 	GetById(id string) (*models.Address, error)
 	CreateAddress(a dto.AddressInputDto) (int, error)
+	GetAddr(a dto.AddressInputDto) (*models.Address, error)
 }

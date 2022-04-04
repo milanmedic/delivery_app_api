@@ -3,43 +3,43 @@ package services
 import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/models"
-	user_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/user_repository"
+	customer_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/customer_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 	"github.com/google/uuid"
 )
 
-type UserService struct {
-	repository user_repo.UserRepositer
+type CustomerService struct {
+	repository customer_repo.CustomerRepositer
 }
 
-func CreateUserService(repo user_repo.UserRepositer) *UserService {
-	return &UserService{repository: repo}
+func CreateCustomerService(repo customer_repo.CustomerRepositer) *CustomerService {
+	return &CustomerService{repository: repo}
 }
 
-func (us *UserService) CreateUser(ud dto.UserInputDto) error {
-	var user models.User
+func (us *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
+	var customer models.Customer
 	var addr *models.Address = models.CreateAddress(ud.Address.Id, ud.Address.StreetNum, ud.Address.City, ud.Address.Street, ud.Address.Postfix)
 
-	user.SetId(uuid.NewString())
-	user.SetUsername(ud.Username)
-	user.SetName(ud.Name)
-	user.SetSurname(ud.Surname)
-	user.SetEmail(ud.Email)
+	customer.SetId(uuid.NewString())
+	customer.SetUsername(ud.Username)
+	customer.SetName(ud.Name)
+	customer.SetSurname(ud.Surname)
+	customer.SetEmail(ud.Email)
 	hash, err := security.HashPassword(ud.Password)
 	if err != nil {
 		return err
 	}
-	user.SetPassword(hash)
-	user.SetDateOfBirth(ud.DateOfBirth)
-	user.SetAddress(addr)
-	user.SetRole("CUSTOMER")
-	user.SetVerificationStatus("UNVERIFIED")
+	customer.SetPassword(hash)
+	customer.SetDateOfBirth(ud.DateOfBirth)
+	customer.SetAddress(addr)
+	customer.SetRole("CUSTOMER")
+	customer.SetVerificationStatus("UNVERIFIED")
 
-	return us.repository.CreateUser(user)
+	return us.repository.CreateCustomer(customer)
 }
 
-func (us *UserService) ValidateUserRegistrationInput(udto dto.UserInputDto) error {
+func (us *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error {
 	err := validations.ValidateName(udto.Name)
 	if err != nil {
 		return err
@@ -80,12 +80,12 @@ func (us *UserService) ValidateUserRegistrationInput(udto dto.UserInputDto) erro
 	return nil
 }
 
-func (us *UserService) GetUser(attr string, value interface{}) (*models.User, error) {
-	return us.repository.GetUser(attr, value)
+func (us *CustomerService) GetCustomer(attr string, value interface{}) (*models.Customer, error) {
+	return us.repository.GetCustomer(attr, value)
 }
 
-func (us *UserService) Exists(email string) (bool, error) {
-	user, err := us.GetUser("email", email)
+func (us *CustomerService) Exists(email string) (bool, error) {
+	user, err := us.GetCustomer("email", email)
 	if err != nil {
 		return false, err
 	}

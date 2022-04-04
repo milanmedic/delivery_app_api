@@ -14,6 +14,36 @@ func CreateAddrDb(dbDrivers *dbdrivers.DeliveryAppDb) *AddrDb {
 	return &AddrDb{dbDriver: dbDrivers}
 }
 
+func (ad *AddrDb) GetAddr(addr dto.AddressInputDto) (*models.Address, error) {
+	stmt, err := ad.dbDriver.Prepare(`SELECT * from address WHERE city = ? and street = ? and street_num = ? and postfix = ?;`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(addr.City, addr.Street, addr.StreetNum, addr.Postfix)
+
+	var addrID int
+	var street string
+	var city string
+	var streetNum int
+	var postfix string
+
+	err = row.Scan(&addrID, &city, &street, &streetNum, &postfix)
+	if err != nil {
+		return nil, nil
+	}
+
+	foundAddr := new(models.Address)
+	foundAddr.Id = addrID
+	foundAddr.City = city
+	foundAddr.Street = street
+	foundAddr.StreetNum = streetNum
+	foundAddr.Postfix = postfix
+
+	return foundAddr, nil
+}
+
 func (ad *AddrDb) GetByID(id string) (*models.Address, error) {
 	stmt, err := ad.dbDriver.Prepare(`SELECT * from address WHERE id = ?;`)
 	if err != nil {
@@ -30,7 +60,7 @@ func (ad *AddrDb) GetByID(id string) (*models.Address, error) {
 	var postfix string
 	err = row.Scan(&addrID, &city, &street, &streetNum, &postfix)
 	if err != nil {
-		return nil, err
+		return nil, nil
 	}
 
 	addr := new(models.Address)
