@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 
+	"delivery_app_api.mmedic.com/m/v2/src/controllers"
 	customer_controller "delivery_app_api.mmedic.com/m/v2/src/controllers"
-	deliveryAppDb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
-	addrsqldb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/addr_sql_db"
-	customerqldb "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/customer_sql_db"
+	sql_driver "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
+	addr_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/addr_sql_db"
+	customer_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/customer_sql_db"
 	addr_repository "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/addr_repository"
 	customer_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/customer_repository"
-	customer_route "delivery_app_api.mmedic.com/m/v2/src/routes"
+	routes "delivery_app_api.mmedic.com/m/v2/src/routes"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
+	admin_service "delivery_app_api.mmedic.com/m/v2/src/services/admin_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
 
@@ -21,7 +23,7 @@ import (
 func main() {
 	//**************************************************************************
 	// DATABASE CREATION
-	db, err := deliveryAppDb.CreateDeliveryAppDb()
+	db, err := sql_driver.CreateDeliveryAppDb()
 	HandleError(err)
 	err = db.CheckConnection()
 	HandleError(err)
@@ -44,17 +46,23 @@ func main() {
 
 	//**************************************************************************
 	// USER SERVICES, CONTROLLERS & ROUTES SETUP
-	adb := addrsqldb.CreateAddrDb(db)
+	adb := addr_sql_db.CreateAddrDb(db)
 	ar := addr_repository.CreateAddrRepository(adb)
 	as := addr_service.CreateAddrService(ar)
 
-	cdb := customerqldb.CreateCustomerDb(db)
+	cdb := customer_sql_db.CreateCustomerDb(db)
 	cr := customer_repo.CreateCustomerRepository(cdb)
 	cs := customer_service.CreateCustomerService(cr)
 	cc := customer_controller.CreateCustomerController(cs, as)
-	customer_route.SetupCustomerRoutes(router, cc)
+	routes.SetupCustomerRoutes(router, cc)
 
 	//**************************************************************************
+	// ADMIN ROUTES
+	ads := admin_service.CreateAdminService(cs)
+	adc := controllers.CreateAdminController(ads, cs)
+	routes.SetupAdminRoutes(router, adc)
+	//**************************************************************************
+
 	// RUN SERVER
 	PORT := env_utils.GetEnvVar("PORT")
 	err = router.Run(fmt.Sprintf(":%s", PORT))

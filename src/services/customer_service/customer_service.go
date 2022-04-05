@@ -1,4 +1,4 @@
-package services
+package customer_service
 
 import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
@@ -17,7 +17,7 @@ func CreateCustomerService(repo customer_repo.CustomerRepositer) *CustomerServic
 	return &CustomerService{repository: repo}
 }
 
-func (us *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
+func (cs *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
 	var customer models.Customer
 	var addr *models.Address = models.CreateAddress(ud.Address.Id, ud.Address.StreetNum, ud.Address.City, ud.Address.Street, ud.Address.Postfix)
 
@@ -36,10 +36,10 @@ func (us *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
 	customer.SetRole("CUSTOMER")
 	customer.SetVerificationStatus("UNVERIFIED")
 
-	return us.repository.CreateCustomer(customer)
+	return cs.repository.CreateCustomer(customer)
 }
 
-func (us *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error {
+func (cs *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error {
 	err := validations.ValidateName(udto.Name)
 	if err != nil {
 		return err
@@ -80,12 +80,12 @@ func (us *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerIn
 	return nil
 }
 
-func (us *CustomerService) GetCustomer(attr string, value interface{}) (*models.Customer, error) {
-	return us.repository.GetCustomer(attr, value)
+func (cs *CustomerService) GetCustomer(attr string, value interface{}) (*models.Customer, error) {
+	return cs.repository.GetCustomer(attr, value)
 }
 
-func (us *CustomerService) Exists(email string) (bool, error) {
-	user, err := us.GetCustomer("email", email)
+func (cs *CustomerService) Exists(email string) (bool, error) {
+	user, err := cs.GetCustomer("email", email)
 	if err != nil {
 		return false, err
 	}
@@ -94,4 +94,8 @@ func (us *CustomerService) Exists(email string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (cs *CustomerService) UpdateProperty(property string, value interface{}, id string) error {
+	return cs.repository.UpdateProperty(property, value, id)
 }

@@ -1,4 +1,4 @@
-package services
+package customer_service
 
 import (
 	dto "delivery_app_api.mmedic.com/m/v2/src/dto"
@@ -10,4 +10,5 @@ type CustomerServicer interface {
 	Exists(email string) (bool, error)
 	ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error
 	CreateCustomer(ud dto.CustomerInputDto) error
+	UpdateProperty(property string, value interface{}, id string) error
 }
