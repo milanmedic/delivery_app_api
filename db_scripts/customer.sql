@@ -1,14 +1,14 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS customer (
     "id" TEXT,
     "username" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "surname" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "email" TEXT NOT NULL UNIQUE,
     "password" TEXT NOT NULL,
     "date_of_birth" TEXT,
     "address" INTEGER NOT NULL,
     "role" TEXT NOT NULL,
-    "verification_status" TEXT DEFAULT "PROCESSING",
+    "verification_status" TEXT DEFAULT "UNVERIFIED",
     PRIMARY KEY("id"),
     FOREIGN KEY("address")
         REFERENCES address(id)
