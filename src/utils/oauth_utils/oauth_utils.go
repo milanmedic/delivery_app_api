@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
+	"delivery_app_api.mmedic.com/m/v2/src/models"
+	"delivery_app_api.mmedic.com/m/v2/src/services/request_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
 )
 
@@ -16,6 +16,13 @@ type GithubAccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	Scope       string `json:"scope"`
+}
+
+type GithubCustomerDetails struct {
+	Name     string `json:"name"`
+	Username string `json:"login"`
+	Email    string `json:"email"`
+	City     string `json:"location"`
 }
 
 func GetLoginOAuthURL() string {
@@ -51,7 +58,6 @@ func GetCustomerGithubInformation(code, action string) (*dto.CustomerInputDto, e
 }
 
 func GetOAuthAccessToken(code, action string) (string, error) {
-	// TODO: REFACTOR AS REQUEST SERVICE
 	bodyValues := map[string]string{
 		"client_id":     env_utils.GetEnvVar(fmt.Sprintf("OAUTH_GITHUB_%s_CLIENT_ID", action)),
 		"client_secret": env_utils.GetEnvVar(fmt.Sprintf("OAUTH_GITHUB_%s_CLIENT_SECRET", action)),
@@ -62,17 +68,16 @@ func GetOAuthAccessToken(code, action string) (string, error) {
 		return "", err
 	}
 
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer(json_data))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
+	request := request_service.CreatePOSTRequest("https://github.com/login/oauth/access_token", bytes.NewBuffer(json_data))
 
-	resp, err := client.Do(req)
+	respbody, status, err := request.Send()
 	if err != nil {
 		return "", err
 	}
 
-	respbody, _ := ioutil.ReadAll(resp.Body)
+	if status >= 400 && status <= 600 {
+		return "", models.CreateCustomError(fmt.Sprintf("There was an error while sending the Request. Error status: %d", status))
+	}
 
 	var ghresp GithubAccessTokenResponse
 	json.Unmarshal(respbody, &ghresp)
@@ -81,33 +86,31 @@ func GetOAuthAccessToken(code, action string) (string, error) {
 }
 
 func GetCustomerOAuthProfile(accessToken string) (*dto.CustomerInputDto, error) {
-	// TODO: REFACTOR AS REQUEST SERVICE
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("token %s", accessToken))
+	request := request_service.CreateGETRequest("https://api.github.com/user")
+	request.SetHeader("Authorization", fmt.Sprintf("token %s", accessToken))
 
-	resp, err := client.Do(req)
+	respbody, status, err := request.Send()
 	if err != nil {
 		return nil, err
 	}
 
-	var res map[string]interface{}
-
-	err = json.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
-		return nil, err
+	if status >= 400 && status <= 600 {
+		return nil, models.CreateCustomError(fmt.Sprintf("There was an error while sending the Request. Error status: %d", status))
 	}
+
+	var gCustDetails GithubCustomerDetails
+	json.Unmarshal(respbody, &gCustDetails)
 
 	user := new(dto.CustomerInputDto)
 	addr := new(dto.AddressInputDto)
 
 	user.Address = addr
-	nameSurname := strings.Split(res["name"].(string), " ")
+	nameSurname := strings.Split(gCustDetails.Name, " ")
 	user.Name = nameSurname[0]
 	user.Surname = nameSurname[1]
-	user.Username = res["login"].(string)
-	user.Email = res["email"].(string)
-	user.Address.City = res["location"].(string)
+	user.Username = gCustDetails.Username
+	user.Email = gCustDetails.Email
+	user.Address.City = gCustDetails.City
 
 	return user, nil
 }
