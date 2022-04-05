@@ -15,7 +15,7 @@ type AuthHeader struct {
 	IDToken string `header:"Authorization"`
 }
 
-func Authenticate() gin.HandlerFunc {
+func Authenticate(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := &AuthHeader{}
 
@@ -46,6 +46,21 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		_, claims, err := jwt_utils.ParseToken(token)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while parsting the token. \nReason: %s", err.Error()))
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if strings.Compare(role, "*") != 0 {
+			if strings.Compare(claims.Role, role) != 0 {
+				c.Error(fmt.Errorf("Unauthorized!"))
+				c.Status(http.StatusUnauthorized)
+				c.Abort()
+			}
+		}
+
 		c.Next()
 	}
 }
@@ -58,7 +73,7 @@ func RefreshToken(c *gin.Context) {
 
 	_, claims, err := jwt_utils.ParseToken(token)
 	if err != nil {
-		c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("Error while parsting the token. \nReason: %s", err.Error()))
 		c.Status(http.StatusInternalServerError)
 	}
 
