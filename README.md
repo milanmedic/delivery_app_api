@@ -27,17 +27,17 @@ Config for caching Git credentials: ```git config --global credential.helper "ca
                 * Street Number
                 * Street Num Postfix
 
-* OAuth Login - IN PROGRESS
-    * Forbid Login if user not verified - Do after verification logic
-* Verify Customer (Admin)
-* Verify Deliverer (Admin)
-* Send Verification Email Confirmation (Admin)
-* Get Profile (Customer, Admin, Deliverer)
-* Get Current Order (Customer) - Verified Only
-* Place New Order (Customer) - Verified Only
-* Previous Orders (Customer) - Verified Only
-* All Orders (Admin)
-* Add Article (Admin)
+* OAuth Login - DONE
+    * Forbid Login if user not verified - Do after verification logic (NOT DONE)
+* Verify Customer (Admin) (NOT DONE)
+* Verify Deliverer (Admin) (NOT DONE)
+* Send Verification Email Confirmation (Admin) (NOT DONE)
+* Get Profile (Customer, Admin, Deliverer) (NOT DONE)
+* Get Current Order (Customer) - Verified Only (NOT DONE)
+* Place New Order (Customer) - Verified Only (NOT DONE)
+* Previous Orders (Customer) - Verified Only (NOT DONE)
+* All Orders (Admin) (NOT DONE)
+* Add Article (Admin) (NOT DONE)
 
 ##### EDGE CASES
 * Since GitHub Customer registration doesn't provide all the needed field for the address, an address will be created with missing fields.
