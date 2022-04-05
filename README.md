@@ -10,15 +10,15 @@ Config for caching Git credentials: ```git config --global credential.helper "ca
 
 ##### TODO
 * Registration (DONE)
-* Login
-* OAuth Registration
-* OAuth Login
+* Login (DONE)
+* OAuth Registration - IN PROGRESS
+* OAuth Login - IN PROGRESS
 * Verify Customer (Admin)
 * Verify Deliverer (Admin)
+* Send Verification Email Confirmation (Admin)
 * Get Profile (Customer, Admin, Deliverer)
 * Get Current Order (Customer)
 * Place New Order (Customer)
 * Previous Orders (Customer)
 * All Orders (Admin)
 * Add Article (Admin)
-* Send Verification Email Confirmation

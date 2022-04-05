@@ -18,10 +18,6 @@ func CreateCustomerDb(dbDriver *dbdrivers.DeliveryAppDb) *CustomerDb {
 	return &CustomerDb{dbDriver: dbDriver}
 }
 
-func getUnderlyingAsValue(data interface{}) reflect.Value {
-	return reflect.ValueOf(data)
-}
-
 func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, error) {
 	stmt, err := cdb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
 	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE %s = ?;`, attr))
