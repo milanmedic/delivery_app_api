@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS address (
     "id" INTEGER,
-    "city" TEXT NOT NULL,
-    "street" TEXT NOT NULL,
-    "street_num" INTEGER NOT NULL,
-    "postfix" TEXT NOT NULL,
+    "city" TEXT,
+    "street" TEXT,
+    "street_num" INTEGER,
+    "postfix" TEXT,
     PRIMARY KEY("id" AUTOINCREMENT)
 );

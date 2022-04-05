@@ -8,6 +8,7 @@ import (
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/oauth_utils"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 	"github.com/gin-gonic/gin"
@@ -96,19 +97,19 @@ func (uc *CustomerController) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.customerService.GetCustomer("email", credentials.Email)
+	customer, err := uc.customerService.GetCustomer("email", credentials.Email)
 	if err != nil {
-		c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if user == nil {
+	if customer == nil {
 		c.String(http.StatusNotFound, "User with the provided email was not found.")
 		return
 	}
 
-	if !security.CheckPasswordHash(credentials.Password, user.Password) {
+	if !security.CheckPasswordHash(credentials.Password, customer.Password) {
 		c.String(http.StatusUnauthorized, "Wrong password.")
 		return
 	}
@@ -123,5 +124,97 @@ func (uc *CustomerController) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	return
+}
+
+func (uc *CustomerController) SendLoginOAuthRequest(c *gin.Context) {
+	reqURL := oauth_utils.GetLoginOAuthURL()
+	c.Redirect(http.StatusFound, reqURL)
+	return
+}
+
+func (uc *CustomerController) OAuthLogin(c *gin.Context) {
+	code := c.Query("code")
+
+	customerData, err := oauth_utils.GetCustomerGithubInformation(code, "LOGIN")
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	customer, err := uc.customerService.GetCustomer("email", customerData.Email)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if customer == nil {
+		c.String(http.StatusNotFound, "User with the provided email was not found.")
+		return
+	}
+
+	claims := jwt_utils.CreateClaims()
+	claims.Email = customer.Email
+
+	tokenString, err := jwt_utils.CreateToken(claims)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	return
+}
+
+func (uc *CustomerController) SendRegistrationOAuthRequest(c *gin.Context) {
+	reqURL := oauth_utils.GetRegistrationOAuthURL()
+	c.Redirect(http.StatusFound, reqURL)
+	return
+}
+
+func (uc *CustomerController) OAuthRegistration(c *gin.Context) {
+
+	code := c.Query("code")
+
+	customerData, err := oauth_utils.GetCustomerGithubInformation(code, "REGISTRATION")
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	exists, err := uc.customerService.Exists(customerData.Email)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if exists {
+		c.String(http.StatusNotFound, "User with the provided email already exists.")
+		return
+	}
+
+	addrId, err := uc.addrService.CreateAddress(*customerData.Address)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	customerData.Address.Id = addrId
+
+	if !exists {
+		err = uc.customerService.CreateCustomer(*customerData)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	c.Status(204)
 	return
 }
