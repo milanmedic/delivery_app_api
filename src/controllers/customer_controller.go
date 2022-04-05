@@ -116,6 +116,7 @@ func (uc *CustomerController) Login(c *gin.Context) {
 
 	claims := jwt_utils.CreateClaims()
 	claims.Email = credentials.Email
+	claims.Role = customer.Role
 
 	tokenString, err := jwt_utils.CreateToken(claims)
 	if err != nil {
@@ -157,6 +158,7 @@ func (uc *CustomerController) OAuthLogin(c *gin.Context) {
 
 	claims := jwt_utils.CreateClaims()
 	claims.Email = customer.Email
+	claims.Role = customer.Role
 
 	tokenString, err := jwt_utils.CreateToken(claims)
 	if err != nil {
