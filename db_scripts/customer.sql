@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS customer (
     "name" TEXT NOT NULL,
     "surname" TEXT NOT NULL,
     "email" TEXT NOT NULL UNIQUE,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "date_of_birth" TEXT,
     "address" INTEGER NOT NULL,
     "role" TEXT NOT NULL,
