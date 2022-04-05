@@ -1,4 +1,4 @@
-package services
+package addr_service
 
 import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"

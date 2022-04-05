@@ -1,4 +1,4 @@
-package usersqldb
+package customer_sql_db
 
 import (
 	"database/sql"
@@ -20,7 +20,7 @@ func CreateCustomerDb(dbDriver *dbdrivers.DeliveryAppDb) *CustomerDb {
 
 func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, error) {
 	stmt, err := cdb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
-	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE %s = ?;`, attr))
+	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE c.%s = ?;`, attr))
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,35 @@ func (cdb *CustomerDb) AddOne(u models.Customer) error {
 	return nil
 }
 
-func (cdb *CustomerDb) Update() error {
+func (cdb *CustomerDb) UpdateProperty(property string, value interface{}, id string) error {
+	stmt, err := cdb.dbDriver.Prepare(fmt.Sprintf(`UPDATE customer SET %s = ? where customer.id = ?;`, property))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	val := reflect.ValueOf(value)
+	ptr := val
+
+	switch ptr.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		concreteValue := strconv.FormatInt(ptr.Int(), 10)
+		_, err = stmt.Exec(concreteValue, id)
+	case reflect.String:
+		concreteValue := ptr.String()
+		_, err = stmt.Exec(concreteValue, id)
+	case reflect.Float32, reflect.Float64:
+		concreteValue := strconv.FormatFloat(ptr.Float(), 'f', 2, 32)
+		_, err = stmt.Exec(concreteValue, id)
+	case reflect.Bool:
+		concreteValue := strconv.FormatBool(ptr.Bool())
+		_, err = stmt.Exec(concreteValue, id)
+	}
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

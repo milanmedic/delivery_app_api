@@ -1,4 +1,4 @@
-package addrsqldb
+package addr_sql_db
 
 import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
