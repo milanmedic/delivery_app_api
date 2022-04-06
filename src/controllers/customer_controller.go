@@ -14,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//TODO: Refactor
+//TODO: CHange all errors to custom error
 type CustomerController struct {
 	customerService customer_service.CustomerServicer
 	addrService     addr_service.AddrServicer
