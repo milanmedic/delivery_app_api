@@ -76,7 +76,7 @@ func GetOAuthAccessToken(code, action string) (string, error) {
 	}
 
 	if status >= 400 && status <= 600 {
-		return "", models.CreateCustomError(fmt.Sprintf("There was an error while sending the Request. Error status: %d", status))
+		return "", models.CreateCustomError(fmt.Sprintf("There was an error while sending the Github Access Token Request. Error status: %d.", status))
 	}
 
 	var ghresp GithubAccessTokenResponse
@@ -95,7 +95,7 @@ func GetCustomerOAuthProfile(accessToken string) (*dto.CustomerInputDto, error) 
 	}
 
 	if status >= 400 && status <= 600 {
-		return nil, models.CreateCustomError(fmt.Sprintf("There was an error while sending the Request. Error status: %d", status))
+		return nil, models.CreateCustomError(fmt.Sprintf("There was an error while sending the Github OAuth Profile Request Request. Error status: %d", status))
 	}
 
 	var gCustDetails GithubCustomerDetails

@@ -21,11 +21,19 @@ func Authenticate(role string) gin.HandlerFunc {
 
 		if err := c.ShouldBindHeader(&authHeader); err != nil {
 			c.Status(http.StatusInternalServerError)
+			c.Abort()
 			return
 		}
 
 		if authHeader == nil {
 			c.Status(http.StatusUnauthorized)
+			c.Abort()
+			return
+		}
+
+		if len(authHeader.IDToken) <= 0 {
+			c.Status(http.StatusUnauthorized)
+			c.Abort()
 			return
 		}
 
@@ -35,14 +43,17 @@ func Authenticate(role string) gin.HandlerFunc {
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
 				c.Status(http.StatusUnauthorized)
+				c.Abort()
 				return
 			}
 			c.Status(http.StatusBadRequest)
+			c.Abort()
 			return
 		}
 
 		if !valid {
 			c.Status(http.StatusUnauthorized)
+			c.Abort()
 			return
 		}
 
@@ -50,6 +61,7 @@ func Authenticate(role string) gin.HandlerFunc {
 		if err != nil {
 			c.Error(fmt.Errorf("Error while parsting the token. \nReason: %s", err.Error()))
 			c.Status(http.StatusInternalServerError)
+			c.Abort()
 			return
 		}
 
@@ -58,6 +70,7 @@ func Authenticate(role string) gin.HandlerFunc {
 				c.Error(fmt.Errorf("Unauthorized!"))
 				c.Status(http.StatusUnauthorized)
 				c.Abort()
+				return
 			}
 		}
 

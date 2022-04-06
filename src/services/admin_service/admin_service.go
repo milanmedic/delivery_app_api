@@ -1,6 +1,8 @@
 package admin_service
 
-import "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
+import (
+	"delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
+)
 
 type AdminService struct {
 	customerService customer_service.CustomerServicer
@@ -8,8 +10,4 @@ type AdminService struct {
 
 func CreateAdminService(cs customer_service.CustomerServicer) *AdminService {
 	return &AdminService{customerService: cs}
-}
-
-func (as *AdminService) VerifyCustomer(customerID string) error {
-	return as.customerService.UpdateProperty("verification_status", "VERIFIED", customerID)
 }
