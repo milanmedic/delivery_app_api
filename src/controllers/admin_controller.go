@@ -185,6 +185,7 @@ func (ac *AdminController) AdminLogin(c *gin.Context) {
 
 	claims := jwt_utils.CreateClaims()
 	claims.Email = credentials.Email
+	claims.UserId = admin.Id
 	claims.Role = admin.Role
 
 	tokenString, err := jwt_utils.CreateToken(claims)
