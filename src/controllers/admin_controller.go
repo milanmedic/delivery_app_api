@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: Refactor
+//TODO: Refactor
 //TODO: Change all errors to custom error
 type AdminController struct {
 	adminService     services.AdminServicer
@@ -47,7 +47,7 @@ func (ac *AdminController) VerifyCustomer(c *gin.Context) {
 		return
 	}
 
-	err = ac.adminService.VerifyCustomer(customerID)
+	ac.customerService.UpdateProperty("verification_status", "VERIFIED", customerID)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while verifying customer. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -134,11 +134,11 @@ func (ac *AdminController) VerifyDeliverer(c *gin.Context) {
 	}
 
 	if strings.Compare(deliverer.VerificationStatus, "VERIFIED") == 0 {
-		c.String(http.StatusBadRequest, "Customer already verified")
+		c.String(http.StatusBadRequest, "Deliverer already verified")
 		return
 	}
 
-	err = ac.adminService.VerifyDeliverer(delivererID)
+	ac.delivererService.UpdateProperty("verification_status", "VERIFIED", delivererID)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while verifying customer. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())

@@ -15,7 +15,7 @@ import (
 )
 
 //TODO: Refactor
-//TODO: CHange all errors to custom error
+//TODO: Change all errors to custom error
 type CustomerController struct {
 	customerService customer_service.CustomerServicer
 	addrService     addr_service.AddrServicer

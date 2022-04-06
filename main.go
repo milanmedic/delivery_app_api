@@ -68,7 +68,7 @@ func main() {
 
 	//**************************************************************************
 	// ADMIN ROUTES
-	ads := admin_service.CreateAdminService(cs, ds)
+	ads := admin_service.CreateAdminService(cs)
 	adc := controllers.CreateAdminController(ads, cs, as, ds)
 	routes.SetupAdminRoutes(router, adc)
 	//**************************************************************************
