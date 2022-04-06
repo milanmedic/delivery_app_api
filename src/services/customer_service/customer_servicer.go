@@ -6,9 +6,10 @@ import (
 )
 
 type CustomerServicer interface {
-	GetCustomer(attr string, value interface{}) (*models.Customer, error)
+	GetBy(attr string, value interface{}) (*models.Customer, error)
 	Exists(email string) (bool, error)
 	ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error
 	CreateCustomer(ud dto.CustomerInputDto) error
 	UpdateProperty(property string, value interface{}, id string) error
+	GetCustomerInfo(id string) (*dto.CustomerOutputDto, error)
 }

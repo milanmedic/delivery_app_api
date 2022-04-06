@@ -80,12 +80,12 @@ func (cs *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerIn
 	return nil
 }
 
-func (cs *CustomerService) GetCustomer(attr string, value interface{}) (*models.Customer, error) {
-	return cs.repository.GetCustomer(attr, value)
+func (cs *CustomerService) GetBy(attr string, value interface{}) (*models.Customer, error) {
+	return cs.repository.GetBy(attr, value)
 }
 
 func (cs *CustomerService) Exists(email string) (bool, error) {
-	user, err := cs.GetCustomer("email", email)
+	user, err := cs.GetBy("email", email)
 	if err != nil {
 		return false, err
 	}
@@ -98,4 +98,32 @@ func (cs *CustomerService) Exists(email string) (bool, error) {
 
 func (cs *CustomerService) UpdateProperty(property string, value interface{}, id string) error {
 	return cs.repository.UpdateProperty(property, value, id)
+}
+
+func (cs *CustomerService) GetCustomerInfo(id string) (*dto.CustomerOutputDto, error) {
+	customer, err := cs.GetBy("id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	if customer == nil {
+		return nil, nil
+	}
+
+	var customerOutputDto *dto.CustomerOutputDto = new(dto.CustomerOutputDto)
+	var addressOutputDto *dto.AddressOutputDto = new(dto.AddressOutputDto)
+
+	addressOutputDto.City = customer.Address.City
+	addressOutputDto.Street = customer.Address.Street
+	addressOutputDto.StreetNum = customer.Address.StreetNum
+	addressOutputDto.Postfix = customer.Address.Postfix
+
+	customerOutputDto.Address = addressOutputDto
+	customerOutputDto.Name = customer.Name
+	customerOutputDto.Surname = customer.Surname
+	customerOutputDto.Email = customer.Email
+	customerOutputDto.Username = customer.Username
+	customerOutputDto.DateOfBirth = customer.DateOfBirth
+
+	return customerOutputDto, nil
 }

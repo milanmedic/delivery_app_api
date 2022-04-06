@@ -99,7 +99,7 @@ func (uc *CustomerController) Login(c *gin.Context) {
 		return
 	}
 
-	customer, err := uc.customerService.GetCustomer("email", credentials.Email)
+	customer, err := uc.customerService.GetBy("email", credentials.Email)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -146,7 +146,7 @@ func (uc *CustomerController) OAuthLogin(c *gin.Context) {
 		return
 	}
 
-	customer, err := uc.customerService.GetCustomer("email", customerData.Email)
+	customer, err := uc.customerService.GetBy("email", customerData.Email)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -220,5 +220,24 @@ func (uc *CustomerController) OAuthRegistration(c *gin.Context) {
 	}
 
 	c.Status(204)
+	return
+}
+
+func (cc *CustomerController) GetCustomerInfo(c *gin.Context) {
+	var id string = c.Param("id")
+
+	adminOut, err := cc.customerService.GetCustomerInfo(id)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if adminOut == nil {
+		c.String(http.StatusNotFound, "Customer doesn't exist.")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": adminOut})
 	return
 }

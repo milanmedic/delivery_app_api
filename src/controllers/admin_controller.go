@@ -33,7 +33,7 @@ func (ac *AdminController) VerifyCustomer(c *gin.Context) {
 
 	customerID := c.Query("customerID")
 
-	customer, err := ac.customerService.GetCustomer("id", customerID)
+	customer, err := ac.customerService.GetBy("id", customerID)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -197,7 +197,7 @@ func (ac *AdminController) AdminLogin(c *gin.Context) {
 	return
 }
 
-func (ac *AdminController) GetInfo(c *gin.Context) {
+func (ac *AdminController) GetAdminInfo(c *gin.Context) {
 	var id string = c.Param("id")
 
 	adminOut, err := ac.adminService.GetAdminInfo(id)
