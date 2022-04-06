@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
@@ -116,6 +117,11 @@ func (uc *CustomerController) Login(c *gin.Context) {
 		return
 	}
 
+	if strings.Compare(customer.VerificationStatus, "VERIFIED") != 0 {
+		c.String(http.StatusUnauthorized, "Account not verified.")
+		return
+	}
+
 	claims := jwt_utils.CreateClaims()
 	claims.Email = credentials.Email
 	claims.UserId = customer.Id
@@ -156,6 +162,11 @@ func (uc *CustomerController) OAuthLogin(c *gin.Context) {
 
 	if customer == nil {
 		c.String(http.StatusNotFound, "User with the provided email was not found.")
+		return
+	}
+
+	if strings.Compare(customer.VerificationStatus, "VERIFIED") != 0 {
+		c.String(http.StatusUnauthorized, "Account not verified.")
 		return
 	}
 
