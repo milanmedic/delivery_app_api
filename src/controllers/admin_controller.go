@@ -10,6 +10,9 @@ import (
 	services "delivery_app_api.mmedic.com/m/v2/src/services/admin_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 	"github.com/gin-gonic/gin"
 )
 
@@ -146,5 +149,69 @@ func (ac *AdminController) VerifyDeliverer(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+	return
+}
+
+func (ac *AdminController) AdminLogin(c *gin.Context) {
+	var credentials jwt_utils.Credentials
+	err := c.BindJSON(&credentials)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = validations.ValidateEmail(credentials.Email)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	admin, err := ac.adminService.GetBy("email", credentials.Email)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the admin info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if admin == nil {
+		c.String(http.StatusNotFound, "Admin with the provided email was not found.")
+		return
+	}
+
+	if !security.CheckPasswordHash(credentials.Password, admin.Password) {
+		c.String(http.StatusUnauthorized, "Wrong password.")
+		return
+	}
+
+	claims := jwt_utils.CreateClaims()
+	claims.Email = credentials.Email
+	claims.Role = admin.Role
+
+	tokenString, err := jwt_utils.CreateToken(claims)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	return
+}
+
+func (ac *AdminController) GetInfo(c *gin.Context) {
+	var id string = c.Param("id")
+
+	adminOut, err := ac.adminService.GetAdminInfo(id)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while retrieving the admin info. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if adminOut == nil {
+		c.String(http.StatusNotFound, "Admin doesn't exist.")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": adminOut})
 	return
 }
