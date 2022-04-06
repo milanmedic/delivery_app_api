@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
@@ -49,6 +50,11 @@ func (dc *DelivererController) DelivererLogin(c *gin.Context) {
 
 	if !security.CheckPasswordHash(credentials.Password, deliverer.Password) {
 		c.String(http.StatusUnauthorized, "Wrong password.")
+		return
+	}
+
+	if strings.Compare(deliverer.VerificationStatus, "VERIFIED") != 0 {
+		c.String(http.StatusUnauthorized, "Account not verified.")
 		return
 	}
 
