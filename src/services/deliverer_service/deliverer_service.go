@@ -99,3 +99,32 @@ func (ds *DelivererService) ValidateDelivererRegistrationInput(udto dto.Delivere
 func (ds *DelivererService) UpdateProperty(property string, value interface{}, id string) error {
 	return ds.delivererRepository.UpdateProperty(property, value, id)
 }
+
+func (ds *DelivererService) GetDelivererInfo(id string) (*dto.DelivererOutputDto, error) {
+	deliverer, err := ds.GetBy("id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	if deliverer == nil {
+		return nil, nil
+	}
+
+	var delivererOutputDto *dto.DelivererOutputDto = new(dto.DelivererOutputDto)
+	var addressOutputDto *dto.AddressOutputDto = new(dto.AddressOutputDto)
+
+	addressOutputDto.City = deliverer.Address.City
+	addressOutputDto.Street = deliverer.Address.Street
+	addressOutputDto.StreetNum = deliverer.Address.StreetNum
+	addressOutputDto.Postfix = deliverer.Address.Postfix
+
+	delivererOutputDto.Address = addressOutputDto
+	delivererOutputDto.Name = deliverer.Name
+	delivererOutputDto.Surname = deliverer.Surname
+	delivererOutputDto.Email = deliverer.Email
+	delivererOutputDto.Username = deliverer.Username
+	delivererOutputDto.DateOfBirth = deliverer.DateOfBirth
+	delivererOutputDto.DeliveryInProgess = deliverer.DeliveryInProgress
+
+	return delivererOutputDto, nil
+}

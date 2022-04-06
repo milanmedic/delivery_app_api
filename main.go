@@ -6,9 +6,11 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/controllers"
 	sql_driver "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
 	addr_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/addr_sql_db"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/admin_sql_db"
 	customer_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/customer_sql_db"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/deliverer_sql_db"
 	addr_repository "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/addr_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/admin_repository"
 	customer_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/customer_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/deliverer_repository"
 	routes "delivery_app_api.mmedic.com/m/v2/src/routes"
@@ -68,7 +70,9 @@ func main() {
 
 	//**************************************************************************
 	// ADMIN ROUTES
-	ads := admin_service.CreateAdminService(cs)
+	admdb := admin_sql_db.CreateAdminDb(db)
+	admr := admin_repository.CreateAdminRepository(admdb)
+	ads := admin_service.CreateAdminService(admr)
 	adc := controllers.CreateAdminController(ads, cs, as, ds)
 	routes.SetupAdminRoutes(router, adc)
 	//**************************************************************************

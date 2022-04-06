@@ -17,7 +17,7 @@ func (cr *CustomerRepository) CreateCustomer(u models.Customer) error {
 	return cr.db.AddOne(u)
 }
 
-func (cr *CustomerRepository) GetCustomer(attr string, value interface{}) (*models.Customer, error) {
+func (cr *CustomerRepository) GetBy(attr string, value interface{}) (*models.Customer, error) {
 	return cr.db.GetBy(attr, value)
 }
 

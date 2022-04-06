@@ -11,4 +11,5 @@ type DelivererServicer interface {
 	ValidateDelivererRegistrationInput(udto dto.DelivererInputDto) error
 	GetBy(attr string, value interface{}) (*models.Deliverer, error)
 	Exists(email string) (bool, error)
+	GetDelivererInfo(id string) (*dto.DelivererOutputDto, error)
 }
