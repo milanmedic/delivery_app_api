@@ -24,3 +24,7 @@ func (cr *CustomerRepository) GetBy(attr string, value interface{}) (*models.Cus
 func (cr *CustomerRepository) UpdateProperty(property string, value interface{}, id string) error {
 	return cr.db.UpdateProperty(property, value, id)
 }
+
+func (cr *CustomerRepository) Update(c *models.Customer) (bool, error) {
+	return cr.db.Update(c)
+}
