@@ -77,7 +77,7 @@ func (ac *AdminController) AddDeliverer(c *gin.Context) {
 		return
 	}
 
-	err = ac.delivererService.ValidateDelivererRegistrationInput(delivererDto)
+	err = ac.delivererService.ValidateDelivererDataInput(delivererDto)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())

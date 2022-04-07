@@ -10,11 +10,11 @@ import (
 )
 
 type DelivererService struct {
-	delivererRepository deliverer_repository.DelivererRepositer
+	repository deliverer_repository.DelivererRepositer
 }
 
 func CreateDelivererService(dr deliverer_repository.DelivererRepositer) *DelivererService {
-	return &DelivererService{delivererRepository: dr}
+	return &DelivererService{repository: dr}
 }
 
 func (ds *DelivererService) AddDeliverer(ddto dto.DelivererInputDto) error {
@@ -37,11 +37,11 @@ func (ds *DelivererService) AddDeliverer(ddto dto.DelivererInputDto) error {
 	deliverer.SetDeliveryProgress(false)
 	deliverer.SetVerificationStatus("UNVERIFIED")
 
-	return ds.delivererRepository.AddDeliverer(deliverer)
+	return ds.repository.AddDeliverer(deliverer)
 }
 
 func (ds *DelivererService) GetBy(attr string, value interface{}) (*models.Deliverer, error) {
-	return ds.delivererRepository.GetBy(attr, value)
+	return ds.repository.GetBy(attr, value)
 }
 
 func (ds *DelivererService) Exists(email string) (bool, error) {
@@ -55,7 +55,7 @@ func (ds *DelivererService) Exists(email string) (bool, error) {
 
 	return false, nil
 }
-func (ds *DelivererService) ValidateDelivererRegistrationInput(udto dto.DelivererInputDto) error {
+func (ds *DelivererService) ValidateDelivererDataInput(udto dto.DelivererInputDto) error {
 	err := validations.ValidateName(udto.Name)
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func (ds *DelivererService) ValidateDelivererRegistrationInput(udto dto.Delivere
 }
 
 func (ds *DelivererService) UpdateProperty(property string, value interface{}, id string) error {
-	return ds.delivererRepository.UpdateProperty(property, value, id)
+	return ds.repository.UpdateProperty(property, value, id)
 }
 
 func (ds *DelivererService) GetDelivererInfo(id string) (*dto.DelivererOutputDto, error) {
@@ -127,4 +127,28 @@ func (ds *DelivererService) GetDelivererInfo(id string) (*dto.DelivererOutputDto
 	delivererOutputDto.DeliveryInProgess = deliverer.DeliveryInProgress
 
 	return delivererOutputDto, nil
+}
+
+func (ds *DelivererService) UpdateDeliverer(id string, ddto *dto.DelivererInputDto) (bool, error) {
+	deliverer, err := ds.GetBy("id", id)
+	if err != nil {
+		return false, err
+	}
+	if deliverer == nil {
+		return false, nil
+	}
+
+	deliverer.SetName(ddto.Name)
+	deliverer.SetSurname(ddto.Surname)
+	deliverer.SetUsername(ddto.Username)
+	deliverer.SetEmail(ddto.Username)
+	hash, err := security.HashPassword(ddto.Password)
+	if err != nil {
+		return false, err
+	}
+	deliverer.SetPassword(hash)
+	deliverer.SetDateOfBirth(ddto.DateOfBirth)
+	deliverer.SetAddress((*models.Address)(ddto.Address))
+
+	return ds.repository.Update(deliverer)
 }

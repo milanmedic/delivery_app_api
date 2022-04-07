@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
@@ -89,5 +90,58 @@ func (dc *DelivererController) GetDelivererInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": delivererOut})
+	return
+}
+
+func (dc *DelivererController) UpdateDeliverer(c *gin.Context) {
+	var delivererID string = c.Param("id")
+	var delivererDto dto.DelivererInputDto
+	err := c.BindJSON(&delivererDto)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = dc.delivererService.ValidateDelivererDataInput(delivererDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var addrId int
+	addr, err := dc.addrService.GetAddr(*delivererDto.Address)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if addr == nil {
+		addrId, err = dc.addrService.CreateAddress(*delivererDto.Address)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		delivererDto.Address.Id = addrId
+	} else {
+		delivererDto.Address.Id = addr.Id
+	}
+
+	res, err := dc.delivererService.UpdateDeliverer(delivererID, &delivererDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while updating the deliverer. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !res {
+		c.Error(fmt.Errorf("Deliverer has failed to update or doesn't exist"))
+		c.String(http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.Status(http.StatusOK)
 	return
 }
