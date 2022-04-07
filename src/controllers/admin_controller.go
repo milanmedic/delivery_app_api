@@ -10,6 +10,7 @@ import (
 	services "delivery_app_api.mmedic.com/m/v2/src/services/admin_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
+	"delivery_app_api.mmedic.com/m/v2/src/services/mailing_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
@@ -55,6 +56,13 @@ func (ac *AdminController) VerifyCustomer(c *gin.Context) {
 		c.Error(fmt.Errorf("Error while verifying customer. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	mail := mailing_service.CreateEmail(customer.Email, "Account Validation Status", "Your account has been validated.")
+	err = mail.SendMail()
+	if err != nil {
+		c.Error(fmt.Errorf("Error while sending the verification email. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	c.Status(http.StatusOK)
@@ -146,6 +154,13 @@ func (ac *AdminController) VerifyDeliverer(c *gin.Context) {
 		c.Error(fmt.Errorf("Error while verifying customer. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	mail := mailing_service.CreateEmail(deliverer.Email, "Account Validation Status", "Your account has been validated.")
+	err = mail.SendMail()
+	if err != nil {
+		c.Error(fmt.Errorf("Error while sending the verification email. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	c.Status(http.StatusOK)
