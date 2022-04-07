@@ -16,3 +16,7 @@ func CreateAdminRepository(db admin_sql_db.AdminDber) *AdminRepository {
 func (ar *AdminRepository) GetBy(property string, value interface{}) (*models.Admin, error) {
 	return ar.db.GetBy(property, value)
 }
+
+func (ar *AdminRepository) Update(a *models.Admin) (bool, error) {
+	return ar.db.Update(a)
+}

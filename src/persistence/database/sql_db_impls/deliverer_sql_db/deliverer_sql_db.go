@@ -140,3 +140,31 @@ func (dDb *DelivererDb) GetBy(attr string, value interface{}) (*models.Deliverer
 
 	return deliverer, nil
 }
+
+func (dDb *DelivererDb) Update(d *models.Deliverer) (bool, error) {
+	stmt, err := dDb.dbDriver.Prepare(`UPDATE deliverer SET
+	name = ?,
+	surname = ?,
+	username = ?,
+	email = ?,
+	password = ?,
+	date_of_birth = ?,
+	address = ?
+	where deliverer.id = ?;`)
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(d.Name, d.Surname, d.Username, d.Email, d.Password, d.DateOfBirth, d.Address.Id, d.Id)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

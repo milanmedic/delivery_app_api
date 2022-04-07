@@ -141,6 +141,34 @@ func (cdb *CustomerDb) UpdateProperty(property string, value interface{}, id str
 	return nil
 }
 
+func (cdb *CustomerDb) Update(c *models.Customer) (bool, error) {
+	stmt, err := cdb.dbDriver.Prepare(`UPDATE customer SET
+	name = ?,
+	surname = ?,
+	username = ?,
+	email = ?,
+	password = ?,
+	date_of_birth = ?,
+	address = ?
+	where customer.id = ?;`)
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(c.Name, c.Surname, c.Username, c.Email, c.Password, c.DateOfBirth, c.Address.Id, c.Id)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (cdb *CustomerDb) Delete() error {
 	return nil
 }

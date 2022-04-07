@@ -77,7 +77,7 @@ func (ac *AdminController) AddDeliverer(c *gin.Context) {
 		return
 	}
 
-	err = ac.delivererService.ValidateDelivererRegistrationInput(delivererDto)
+	err = ac.delivererService.ValidateDelivererDataInput(delivererDto)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -229,5 +229,58 @@ func (ac *AdminController) GetAdminInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": adminOut})
+	return
+}
+
+func (ac *AdminController) UpdateAdmin(c *gin.Context) {
+	var adminID string = c.Param("id")
+	var adminDto dto.AdminInputDto
+	err := c.BindJSON(&adminDto)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = ac.adminService.ValidateAdminDataInput(adminDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var addrId int
+	addr, err := ac.addrService.GetAddr(*adminDto.Address)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if addr == nil {
+		addrId, err = ac.addrService.CreateAddress(*adminDto.Address)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		adminDto.Address.Id = addrId
+	} else {
+		adminDto.Address.Id = addr.Id
+	}
+
+	res, err := ac.adminService.UpdateAdmin(adminID, &adminDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while updating the admin. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !res {
+		c.Error(fmt.Errorf("Admin has failed to update or doesn't exist"))
+		c.String(http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.Status(http.StatusOK)
 	return
 }

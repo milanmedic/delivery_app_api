@@ -26,7 +26,7 @@ func CreateCustomerController(customerService customer_service.CustomerServicer,
 	return &CustomerController{customerService: customerService, addrService: addrService}
 }
 
-func (uc *CustomerController) Register(c *gin.Context) {
+func (cc *CustomerController) Register(c *gin.Context) {
 	var customerDto dto.CustomerInputDto
 	err := c.BindJSON(&customerDto)
 	if err != nil {
@@ -34,7 +34,7 @@ func (uc *CustomerController) Register(c *gin.Context) {
 		return
 	}
 
-	err = uc.customerService.ValidateCustomerRegistrationInput(customerDto)
+	err = cc.customerService.ValidateCustomerDataInput(customerDto)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -42,7 +42,7 @@ func (uc *CustomerController) Register(c *gin.Context) {
 	}
 
 	var addrId int
-	addr, err := uc.addrService.GetAddr(*customerDto.Address)
+	addr, err := cc.addrService.GetAddr(*customerDto.Address)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -50,7 +50,7 @@ func (uc *CustomerController) Register(c *gin.Context) {
 	}
 
 	if addr == nil {
-		addrId, err = uc.addrService.CreateAddress(*customerDto.Address)
+		addrId, err = cc.addrService.CreateAddress(*customerDto.Address)
 		if err != nil {
 			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
 			c.String(http.StatusInternalServerError, err.Error())
@@ -61,7 +61,7 @@ func (uc *CustomerController) Register(c *gin.Context) {
 		customerDto.Address.Id = addr.Id
 	}
 
-	exists, err := uc.customerService.Exists(customerDto.Email)
+	exists, err := cc.customerService.Exists(customerDto.Email)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while checking for a customer. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
@@ -74,7 +74,7 @@ func (uc *CustomerController) Register(c *gin.Context) {
 	}
 
 	if !exists {
-		err = uc.customerService.CreateCustomer(customerDto)
+		err = cc.customerService.CreateCustomer(customerDto)
 		if err != nil {
 			c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
 			c.String(http.StatusInternalServerError, err.Error())
@@ -252,5 +252,58 @@ func (cc *CustomerController) GetCustomerInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": adminOut})
+	return
+}
+
+func (cc *CustomerController) UpdateCustomer(c *gin.Context) {
+	var customerID string = c.Param("id")
+	var customerDto dto.CustomerInputDto
+	err := c.BindJSON(&customerDto)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = cc.customerService.ValidateCustomerDataInput(customerDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var addrId int
+	addr, err := cc.addrService.GetAddr(*customerDto.Address)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if addr == nil {
+		addrId, err = cc.addrService.CreateAddress(*customerDto.Address)
+		if err != nil {
+			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		customerDto.Address.Id = addrId
+	} else {
+		customerDto.Address.Id = addr.Id
+	}
+
+	res, err := cc.customerService.UpdateCustomer(customerID, &customerDto)
+	if err != nil {
+		c.Error(fmt.Errorf("Error while updating the customer. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !res {
+		c.Error(fmt.Errorf("Customer has failed to update or doesn't exist"))
+		c.String(http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.Status(http.StatusOK)
 	return
 }

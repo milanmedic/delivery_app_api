@@ -39,7 +39,7 @@ func (cs *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
 	return cs.repository.CreateCustomer(customer)
 }
 
-func (cs *CustomerService) ValidateCustomerRegistrationInput(udto dto.CustomerInputDto) error {
+func (cs *CustomerService) ValidateCustomerDataInput(udto dto.CustomerInputDto) error {
 	err := validations.ValidateName(udto.Name)
 	if err != nil {
 		return err
@@ -126,4 +126,28 @@ func (cs *CustomerService) GetCustomerInfo(id string) (*dto.CustomerOutputDto, e
 	customerOutputDto.DateOfBirth = customer.DateOfBirth
 
 	return customerOutputDto, nil
+}
+
+func (cs *CustomerService) UpdateCustomer(id string, cdto *dto.CustomerInputDto) (bool, error) {
+	customer, err := cs.GetBy("id", id)
+	if err != nil {
+		return false, err
+	}
+	if customer == nil {
+		return false, nil
+	}
+
+	customer.SetName(cdto.Name)
+	customer.SetSurname(cdto.Surname)
+	customer.SetUsername(cdto.Username)
+	customer.SetEmail(cdto.Username)
+	hash, err := security.HashPassword(cdto.Password)
+	if err != nil {
+		return false, err
+	}
+	customer.SetPassword(hash)
+	customer.SetDateOfBirth(cdto.DateOfBirth)
+	customer.SetAddress((*models.Address)(cdto.Address))
+
+	return cs.repository.Update(customer)
 }

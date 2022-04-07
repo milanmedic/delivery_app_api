@@ -24,3 +24,7 @@ func (dr *DelivererRepository) GetBy(attr string, value interface{}) (*models.De
 func (dr *DelivererRepository) UpdateProperty(property string, value interface{}, id string) error {
 	return dr.db.UpdateProperty(property, value, id)
 }
+
+func (dr *DelivererRepository) Update(d *models.Deliverer) (bool, error) {
+	return dr.db.Update(d)
+}

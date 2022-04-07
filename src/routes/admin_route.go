@@ -12,4 +12,5 @@ func SetupAdminRoutes(router *gin.Engine, ac *controllers.AdminController) {
 	router.POST("/admin/deliverer/create", authentication_utils.Authenticate("ADMIN"), ac.AddDeliverer)
 	router.PATCH("/admin/customer/verify", authentication_utils.Authenticate("ADMIN"), ac.VerifyCustomer)
 	router.PATCH("/admin/deliverer/verify", authentication_utils.Authenticate("ADMIN"), ac.VerifyDeliverer)
+	router.POST("/admin/profile/update/:id", authentication_utils.Authenticate("ADMIN"), ac.UpdateAdmin)
 }

@@ -16,4 +16,5 @@ func SetupCustomerRoutes(router *gin.Engine, uc *controllers.CustomerController)
 	router.GET("register/github", uc.SendRegistrationOAuthRequest)
 	router.GET("register/github/callback", uc.OAuthRegistration)
 	router.GET("/profile/:id", authentication_utils.Authenticate("CUSTOMER"), uc.GetCustomerInfo)
+	router.POST("/profile/update/:id", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomer)
 }
