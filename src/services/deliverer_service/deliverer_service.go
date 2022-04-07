@@ -141,7 +141,7 @@ func (ds *DelivererService) UpdateDeliverer(id string, ddto *dto.DelivererInputD
 	deliverer.SetName(ddto.Name)
 	deliverer.SetSurname(ddto.Surname)
 	deliverer.SetUsername(ddto.Username)
-	deliverer.SetEmail(ddto.Username)
+	deliverer.SetEmail(ddto.Email)
 	hash, err := security.HashPassword(ddto.Password)
 	if err != nil {
 		return false, err

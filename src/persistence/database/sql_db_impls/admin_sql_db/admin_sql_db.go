@@ -80,3 +80,31 @@ func (ad *AdminDb) GetBy(attr string, value interface{}) (*models.Admin, error) 
 
 	return admin, nil
 }
+
+func (adb *AdminDb) Update(a *models.Admin) (bool, error) {
+	stmt, err := adb.dbDriver.Prepare(`UPDATE administrator SET
+	name = ?,
+	surname = ?,
+	username = ?,
+	email = ?,
+	password = ?,
+	date_of_birth = ?,
+	address = ?
+	where administrator.id = ?;`)
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(a.Name, a.Surname, a.Username, a.Email, a.Password, a.DateOfBirth, a.Address.Id, a.Id)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
