@@ -7,15 +7,18 @@ import (
 	sql_driver "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
 	addr_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/addr_sql_db"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/admin_sql_db"
+	article_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/article_db_impls"
 	customer_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/customer_sql_db"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/deliverer_sql_db"
 	addr_repository "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/addr_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/admin_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/article_repository"
 	customer_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/customer_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/deliverer_repository"
 	routes "delivery_app_api.mmedic.com/m/v2/src/routes"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	admin_service "delivery_app_api.mmedic.com/m/v2/src/services/admin_service"
+	"delivery_app_api.mmedic.com/m/v2/src/services/article_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
@@ -24,6 +27,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//TODO: Refactor ROUTE paths
 func main() {
 	//**************************************************************************
 	// DATABASE CREATION
@@ -47,6 +51,18 @@ func main() {
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	router.Use(gin.Recovery())
 	router.Use(CORSMiddleware())
+
+	//**************************************************************************
+	// GENERAL ROUTES
+	routes.SetupGeneralRoutes(router)
+
+	//**************************************************************************
+	// ARTICLE SERVICE
+	ardb := article_sql_db.CreateArticleDb(db)
+	arr := article_repository.CreateArticleRepository(ardb)
+	ars := article_service.CreateArticleService(arr)
+	arc := controllers.CreateArticleController(ars)
+	routes.SetupArticleRoutes(router, arc)
 
 	//**************************************************************************
 	// USER SERVICES, CONTROLLERS & ROUTES SETUP
