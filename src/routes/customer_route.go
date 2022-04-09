@@ -8,13 +8,14 @@ import (
 )
 
 func SetupCustomerRoutes(router *gin.Engine, uc *controllers.CustomerController) {
-	router.POST("/register", uc.Register)
-	router.POST("/login", uc.Login)
-	router.GET("/refresh", authentication_utils.Authenticate("*"), authentication_utils.RefreshToken)
-	router.GET("login/github", uc.SendLoginOAuthRequest)
-	router.GET("login/github/callback", uc.OAuthLogin)
-	router.GET("register/github", uc.SendRegistrationOAuthRequest)
-	router.GET("register/github/callback", uc.OAuthRegistration)
-	router.GET("/profile/:id", authentication_utils.Authenticate("CUSTOMER"), uc.GetCustomerInfo)
-	router.POST("/profile/update/:id", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomer)
+	router.POST("/customer/login", uc.Login)
+	router.POST("/customer/registration", uc.Register)
+
+	router.GET("/customer/login/github", uc.SendLoginOAuthRequest)
+	router.GET("/customer/login/github/callback", uc.OAuthLogin)
+	router.GET("/customer/register/github", uc.SendRegistrationOAuthRequest)
+	router.GET("/customer/register/github/callback", uc.OAuthRegistration)
+
+	router.GET("/customer/:id", authentication_utils.Authenticate("CUSTOMER"), uc.GetCustomerInfo)
+	router.PUT("/customer/:id", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomer)
 }

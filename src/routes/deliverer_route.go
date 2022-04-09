@@ -9,5 +9,6 @@ import (
 func SetupDelivererRoutes(router *gin.Engine, dc *controllers.DelivererController) {
 	router.POST("/deliverer/login", dc.DelivererLogin)
 	router.GET("/deliverer/:id", authentication_utils.Authenticate("DELIVERER"), dc.GetDelivererInfo)
-	router.POST("/deliverer/profile/update/:id", authentication_utils.Authenticate("DELIVERER"), dc.UpdateDeliverer)
+
+	router.PUT("/deliverer/:id", authentication_utils.Authenticate("DELIVERER"), dc.UpdateDeliverer)
 }
