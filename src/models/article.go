@@ -5,6 +5,7 @@ type Article struct {
 	Name        string
 	Description string
 	Price       int
+	Quantity    int
 }
 
 func CreateArticle() *Article {
@@ -25,4 +26,8 @@ func (a *Article) SetDescription(d string) {
 
 func (a *Article) SetPrice(p int) {
 	a.Price = p
+}
+
+func (a *Article) SetQuantity(q int) {
+	a.Quantity = q
 }

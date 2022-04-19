@@ -8,19 +8,25 @@ import (
 	addr_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/addr_sql_db"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/admin_sql_db"
 	article_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/article_db_impls"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/basket_sql_db"
 	customer_sql_db "delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/customer_sql_db"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/deliverer_sql_db"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/order_sql_db"
 	addr_repository "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/addr_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/admin_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/article_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/basket_repository"
 	customer_repo "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/customer_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/deliverer_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/order_repository"
 	routes "delivery_app_api.mmedic.com/m/v2/src/routes"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	admin_service "delivery_app_api.mmedic.com/m/v2/src/services/admin_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/article_service"
+	"delivery_app_api.mmedic.com/m/v2/src/services/basket_service"
 	customer_service "delivery_app_api.mmedic.com/m/v2/src/services/customer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
+	"delivery_app_api.mmedic.com/m/v2/src/services/order_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
 
 	"github.com/gin-gonic/gin"
@@ -91,6 +97,18 @@ func main() {
 	ads := admin_service.CreateAdminService(admr)
 	adc := controllers.CreateAdminController(ads, cs, as, ds)
 	routes.SetupAdminRoutes(router, adc)
+	//**************************************************************************
+
+	//**************************************************************************
+	// ORDER ROUTES
+	bdb := basket_sql_db.CreateBasketDb(db)
+	odb := order_sql_db.CreateOrderDb(db)
+	br := basket_repository.CreateBasketRepository(bdb)
+	bs := basket_service.CreateBasketService(br)
+	or := order_repository.CreateOrderRepository(odb)
+	os := order_service.CreateOrderService(or, bs)
+	oc := controllers.CreateOrderController(os, as)
+	routes.SetupOrderRoutes(router, oc)
 	//**************************************************************************
 
 	// RUN SERVER

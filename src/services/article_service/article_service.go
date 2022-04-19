@@ -20,6 +20,7 @@ func (as *ArticleService) CreateArticle(adto dto.ArticleInputDto) error {
 	article.Name = adto.Name
 	article.Description = adto.Description
 	article.Price = adto.Price
+	article.Quantity = adto.Quantity
 
 	return as.repository.AddOne(*article)
 }
