@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS customer_order (
     "id" INTEGER,
     "comment" TEXT NOT NULL,
     "address" INTEGER NOT NULL,
-    "basket" INTEGER NOT NULL,
+    "basket" TEXT NOT NULL,
     "accepted" BOOLEAN DEFAULT FALSE,
     "deliverer" TEXT,
     "customer" TEXT NOT NULL,

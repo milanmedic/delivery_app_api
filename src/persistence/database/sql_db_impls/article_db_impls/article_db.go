@@ -61,14 +61,14 @@ func (adb *ArticleDb) AddOne(a models.Article) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO article(name, description, price) VALUES(?, ?, ?);`)
+	stmt, err := tx.Prepare(`INSERT INTO article(name, description, price, quantity) VALUES(?, ?, ?, ?);`)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(a.Name, a.Description, a.Price)
+	_, err = stmt.Exec(a.Name, a.Description, a.Price, a.Quantity)
 	if err != nil {
 		_ = tx.Rollback()
 		return err

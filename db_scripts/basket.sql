@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS basket (
-    "id" INTEGER,
+    "id" TEXT,
     "price" INTEGER,
-    PRIMARY KEY("id" autoincrement)
+    PRIMARY KEY("id")
 );
