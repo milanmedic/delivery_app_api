@@ -3,8 +3,6 @@ package article_sql_db
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
-	"strconv"
 
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	dbdrivers "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
@@ -27,22 +25,15 @@ func (adb *ArticleDb) GetBy(attr string, value interface{}) (*models.Article, er
 
 	var row *sql.Row
 
-	val := reflect.ValueOf(value)
-	ptr := val
-
-	switch ptr.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		concreteValue := strconv.FormatInt(ptr.Int(), 10)
-		row = stmt.QueryRow(concreteValue)
-	case reflect.String:
-		concreteValue := ptr.String()
-		row = stmt.QueryRow(concreteValue)
-	case reflect.Float32, reflect.Float64:
-		concreteValue := strconv.FormatFloat(ptr.Float(), 'f', 2, 32)
-		row = stmt.QueryRow(concreteValue)
-	case reflect.Bool:
-		concreteValue := strconv.FormatBool(ptr.Bool())
-		row = stmt.QueryRow(concreteValue)
+	switch value.(type) {
+	case int:
+		row = stmt.QueryRow(value.(int))
+	case float64:
+		row = stmt.QueryRow(value.(float64))
+	case bool:
+		row = stmt.QueryRow(value.(bool))
+	case string:
+		row = stmt.QueryRow(value.(string))
 	}
 
 	var article *models.Article = models.CreateArticle()
