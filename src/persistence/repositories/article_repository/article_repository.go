@@ -24,3 +24,11 @@ func (ar *ArticleRepository) AddOne(a models.Article) error {
 func (ar *ArticleRepository) GetAll() ([]*models.Article, error) {
 	return ar.db.GetAll()
 }
+
+func (ac *ArticleRepository) UpdateProperty(property string, value interface{}, id int) error {
+	return ac.db.UpdateProperty(property, value, id)
+}
+
+func (ac *ArticleRepository) DecrementQuantity(value int, id int) error {
+	return ac.db.DecrementQuantity(value, id)
+}

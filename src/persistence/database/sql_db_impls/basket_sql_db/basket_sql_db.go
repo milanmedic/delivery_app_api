@@ -60,3 +60,36 @@ func formBasketInsertion(bdto dto.BasketInputDto) string {
 
 	return stmt
 }
+
+func (bdb *BasketDb) DeleteBasket(bId string) error {
+	tx, err := bdb.dbDriver.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmts := []string{}
+	s1 := fmt.Sprintf("DELETE FROM article_basket where basket = '%s';", bId)
+	s2 := fmt.Sprintf("DELETE FROM basket where id = '%s';", bId)
+	stmts = append(stmts, s1, s2)
+
+	for _, s := range stmts {
+		stmt, err := tx.Prepare(s)
+		if err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		_, err = stmt.Exec()
+		if err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}

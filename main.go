@@ -33,7 +33,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//TODO: Refactor ROUTE paths
+// TODO: GO through the code and refactor for concurrency
 func main() {
 	//**************************************************************************
 	// DATABASE CREATION
@@ -104,7 +104,7 @@ func main() {
 	bdb := basket_sql_db.CreateBasketDb(db)
 	odb := order_sql_db.CreateOrderDb(db)
 	br := basket_repository.CreateBasketRepository(bdb)
-	bs := basket_service.CreateBasketService(br)
+	bs := basket_service.CreateBasketService(br, ars)
 	or := order_repository.CreateOrderRepository(odb)
 	os := order_service.CreateOrderService(or, bs)
 	oc := controllers.CreateOrderController(os, as)

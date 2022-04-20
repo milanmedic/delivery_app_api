@@ -15,7 +15,7 @@ type AuthHeader struct {
 	IDToken string `header:"Authorization"`
 }
 
-func Authenticate(role string) gin.HandlerFunc {
+func Authenticate(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := &AuthHeader{}
 
@@ -65,15 +65,19 @@ func Authenticate(role string) gin.HandlerFunc {
 			return
 		}
 
-		if strings.Compare(role, "*") != 0 {
-			if strings.Compare(claims.Role, role) != 0 {
-				c.Error(fmt.Errorf("Unauthorized!"))
-				c.Status(http.StatusUnauthorized)
-				c.Abort()
-				return
+		var passed bool
+		for _, role := range roles {
+			if strings.Compare(claims.Role, role) == 0 {
+				passed = true
+				break
 			}
 		}
-
+		if !passed {
+			c.Error(fmt.Errorf("Unauthorized!"))
+			c.Status(http.StatusUnauthorized)
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
@@ -81,7 +85,12 @@ func Authenticate(role string) gin.HandlerFunc {
 func RefreshToken(c *gin.Context) {
 	authHeader := &AuthHeader{}
 
-	_ = c.ShouldBindHeader(&authHeader)
+	err := c.ShouldBindHeader(&authHeader)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	token := strings.Split(authHeader.IDToken, " ")[1]
 
 	_, claims, err := jwt_utils.ParseToken(token)
