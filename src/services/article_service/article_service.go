@@ -32,3 +32,11 @@ func (as *ArticleService) GetBy(attr string, value interface{}) (*models.Article
 func (as *ArticleService) GetAll() ([]*models.Article, error) {
 	return as.repository.GetAll()
 }
+
+func (as *ArticleService) UpdateProperty(property string, value interface{}, id int) error {
+	return as.repository.UpdateProperty(property, value, id)
+}
+
+func (as *ArticleService) DecrementQuantity(value int, id int) error {
+	return as.repository.DecrementQuantity(value, id)
+}

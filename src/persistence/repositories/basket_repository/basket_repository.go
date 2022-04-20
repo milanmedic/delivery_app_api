@@ -16,3 +16,7 @@ func CreateBasketRepository(db basket_sql_db.BasketDber) *BasketRepository {
 func (br *BasketRepository) AddBasket(bdto dto.BasketInputDto) error {
 	return br.db.AddBasket(bdto)
 }
+
+func (br *BasketRepository) DeleteBasket(bId string) error {
+	return br.db.DeleteBasket(bId)
+}

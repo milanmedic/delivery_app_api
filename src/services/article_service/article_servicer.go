@@ -9,4 +9,6 @@ type ArticleServicer interface {
 	CreateArticle(adto dto.ArticleInputDto) error
 	GetBy(attr string, value interface{}) (*models.Article, error)
 	GetAll() ([]*models.Article, error)
+	UpdateProperty(property string, value interface{}, id int) error
+	DecrementQuantity(value int, id int) error
 }

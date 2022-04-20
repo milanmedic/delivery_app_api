@@ -17,19 +17,15 @@ func CreateOrderService(or order_repository.OrderRepositer, bs *basket_service.B
 }
 
 func (os *OrderService) CreateOrder(odto dto.OrderInputDto) error {
-	//1. Use BasketService add Basket
-	// 1.a. Using the Basket service, link articles to basket in the article_basket table
-
-	//2. Afterwards call the OrderService to create a new order
 	odto.Basket.Id = uuid.NewString()
 	err := os.basketService.AddBasket(odto.Basket)
 	if err != nil {
 		return err
 	}
 
-	//TODO: If order creation fails, delete the basket from the database
 	err = os.repository.CreateOrder(odto)
 	if err != nil {
+		os.basketService.DeleteBasket(odto.Basket.Id)
 		return err
 	}
 

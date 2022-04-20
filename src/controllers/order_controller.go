@@ -29,7 +29,6 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 
 	//TODO: Validate input
 	//TODO: Refactor all address adding logic
-	//TODO: Decrease article count on order
 	var addrId int
 	addr, err := oc.addrService.GetAddr(orderDto.Address)
 	if err != nil {

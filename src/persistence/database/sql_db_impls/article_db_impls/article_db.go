@@ -112,3 +112,43 @@ func (adb *ArticleDb) GetAll() ([]*models.Article, error) {
 
 	return articles, nil
 }
+
+func (adb *ArticleDb) DecrementQuantity(value int, id int) error {
+	stmt, err := adb.dbDriver.Prepare(`UPDATE article SET quantity = quantity-? where id = ?;`)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(value, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (adb *ArticleDb) UpdateProperty(property string, value interface{}, id int) error {
+	stmt, err := adb.dbDriver.Prepare(fmt.Sprintf(`UPDATE article SET %s = ? where article.id = ?;`, property))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	switch value.(type) {
+	case int:
+		_, err = stmt.Exec(value.(int), id)
+	case float64:
+		_, err = stmt.Exec(value.(float64), id)
+	case bool:
+		_, err = stmt.Exec(value.(bool), id)
+	case string:
+		_, err = stmt.Exec(value.(string), id)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

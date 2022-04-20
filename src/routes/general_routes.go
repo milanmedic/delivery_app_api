@@ -6,5 +6,5 @@ import (
 )
 
 func SetupGeneralRoutes(router *gin.Engine) {
-	router.GET("/refresh", authentication_utils.Authenticate("*"), authentication_utils.RefreshToken)
+	router.GET("/refresh", authentication_utils.RefreshToken)
 }
