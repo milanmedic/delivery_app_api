@@ -3,8 +3,6 @@ package customer_sql_db
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
-	"strconv"
 
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	dbdrivers "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
@@ -109,22 +107,15 @@ func (cdb *CustomerDb) UpdateProperty(property string, value interface{}, id str
 	}
 	defer stmt.Close()
 
-	val := reflect.ValueOf(value)
-	ptr := val
-
-	switch ptr.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		concreteValue := strconv.FormatInt(ptr.Int(), 10)
-		_, err = stmt.Exec(concreteValue, id)
-	case reflect.String:
-		concreteValue := ptr.String()
-		_, err = stmt.Exec(concreteValue, id)
-	case reflect.Float32, reflect.Float64:
-		concreteValue := strconv.FormatFloat(ptr.Float(), 'f', 2, 32)
-		_, err = stmt.Exec(concreteValue, id)
-	case reflect.Bool:
-		concreteValue := strconv.FormatBool(ptr.Bool())
-		_, err = stmt.Exec(concreteValue, id)
+	switch value.(type) {
+	case int:
+		_, err = stmt.Exec(value.(int), id)
+	case float64:
+		_, err = stmt.Exec(value.(float64), id)
+	case bool:
+		_, err = stmt.Exec(value.(bool), id)
+	case string:
+		_, err = stmt.Exec(value.(string), id)
 	}
 
 	if err != nil {
