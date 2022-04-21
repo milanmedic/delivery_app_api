@@ -13,8 +13,8 @@ func SetupCustomerRoutes(router *gin.Engine, uc *controllers.CustomerController)
 
 	router.GET("/customer/login/github", uc.SendLoginOAuthRequest)
 	router.GET("/customer/login/github/callback", uc.OAuthLogin)
-	router.GET("/customer/register/github", uc.SendRegistrationOAuthRequest)
-	router.GET("/customer/register/github/callback", uc.OAuthRegistration)
+	router.GET("/customer/registration/github", uc.SendRegistrationOAuthRequest)
+	router.GET("/customer/registration/github/callback", uc.OAuthRegistration)
 
 	router.GET("/customer/:id", authentication_utils.Authenticate("CUSTOMER"), uc.GetCustomerInfo)
 	router.PUT("/customer/:id", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomer)

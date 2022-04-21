@@ -7,6 +7,7 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/order_service"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,13 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 	//TODO: Refactor all address adding logic
 	var addrId int
 	addr, err := oc.addrService.GetAddr(orderDto.Address)
+	valid := validations.ValidateAddress(*addr)
+	if !valid {
+		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if err != nil {
 		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
