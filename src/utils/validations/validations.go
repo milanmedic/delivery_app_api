@@ -3,7 +3,9 @@ package validations
 import (
 	"fmt"
 	"net/mail"
+	"strings"
 
+	"delivery_app_api.mmedic.com/m/v2/src/models"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 )
 
@@ -79,4 +81,24 @@ func ValidateStreet(street string) error {
 		return fmt.Errorf("Street name longer than 100 characters.")
 	}
 	return nil
+}
+
+func ValidateAddress(addr models.Address) bool {
+	if addr.Id == 0 {
+		return false
+	}
+
+	if strings.Compare(addr.City, "") == 0 {
+		return false
+	}
+
+	if strings.Compare(addr.Street, "") == 0 {
+		return false
+	}
+
+	if addr.StreetNum == 0 {
+		return false
+	}
+
+	return true
 }
