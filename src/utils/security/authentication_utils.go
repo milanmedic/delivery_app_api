@@ -78,6 +78,7 @@ func Authenticate(roles ...string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.Set("user_id", claims.UserId)
 		c.Next()
 	}
 }

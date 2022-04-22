@@ -67,3 +67,27 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 	c.Status(http.StatusOK)
 	return
 }
+
+func (oc *OrderController) GetOrders(c *gin.Context) {
+	id, ok := c.Get("user_id")
+
+	if !ok {
+		c.Error(fmt.Errorf("User not provided in token."))
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	orders, err := oc.orderService.GetOrdersByUserId(id.(string))
+	if err != nil {
+		c.Error(fmt.Errorf("Error retrieving orders. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(orders) <= 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(200, orders)
+}
