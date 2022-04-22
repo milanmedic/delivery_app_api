@@ -7,5 +7,5 @@ import (
 
 type OrderServicer interface {
 	CreateOrder(odto dto.OrderInputDto) error
-	GetOrdersByUsername(username string) ([]models.Order, error)
+	GetOrdersByUserId(id string) ([]models.Order, error)
 }

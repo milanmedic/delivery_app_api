@@ -8,6 +8,5 @@ import (
 
 func SetupOrderRoutes(router *gin.Engine, oc *controllers.OrderController) {
 	router.POST("/order", authentication_utils.Authenticate("CUSTOMER"), oc.CreateOrder)
-	//TODO: Fix retrieval of articles to retrieve articles based on the token information passed in, not the query parameter
 	router.GET("/orders", authentication_utils.Authenticate("CUSTOMER"), oc.GetOrders)
 }

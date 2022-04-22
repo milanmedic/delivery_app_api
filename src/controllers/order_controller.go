@@ -69,9 +69,15 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 }
 
 func (oc *OrderController) GetOrders(c *gin.Context) {
-	username := c.Query("username")
+	id, ok := c.Get("user_id")
 
-	orders, err := oc.orderService.GetOrdersByUsername(username)
+	if !ok {
+		c.Error(fmt.Errorf("User not provided in token."))
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	orders, err := oc.orderService.GetOrdersByUserId(id.(string))
 	if err != nil {
 		c.Error(fmt.Errorf("Error retrieving orders. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())

@@ -33,6 +33,6 @@ func (os *OrderService) CreateOrder(odto dto.OrderInputDto) error {
 	return nil
 }
 
-func (os *OrderService) GetOrdersByUsername(username string) ([]models.Order, error) {
-	return os.repository.GetOrdersBy("username", username)
+func (os *OrderService) GetOrdersByUserId(id string) ([]models.Order, error) {
+	return os.repository.GetOrdersByUserId(id)
 }

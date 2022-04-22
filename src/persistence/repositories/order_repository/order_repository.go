@@ -18,6 +18,6 @@ func (or *OrderRepository) CreateOrder(odto dto.OrderInputDto) error {
 	return or.db.CreateOrder(odto)
 }
 
-func (or *OrderRepository) GetOrdersBy(attr string, value interface{}) ([]models.Order, error) {
-	return or.db.GetOrdersBy(attr, value)
+func (or *OrderRepository) GetOrdersByUserId(id string) ([]models.Order, error) {
+	return or.db.GetOrdersByUserId(id)
 }

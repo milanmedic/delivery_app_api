@@ -43,7 +43,7 @@ func (odb *OrderDb) CreateOrder(odto dto.OrderInputDto) error {
 	return nil
 }
 
-func (odb *OrderDb) GetOrdersBy(attr string, value interface{}) ([]models.Order, error) {
+func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 	stmt, err := odb.dbDriver.Prepare(`select o.id, o.comment, o.accepted,
 	ifnull(d.name, '') as 'name', ifnull(d.surname, '') as 'surname',
 	b.price as "total",
@@ -63,23 +63,14 @@ func (odb *OrderDb) GetOrdersBy(attr string, value interface{}) ([]models.Order,
 	on ab.article = a.id
 	inner join address addr
 	on addr.id = o.address
-	where c.username=?;`)
+	where c.id=?;`)
 	if err != nil {
 		return nil, err
 	}
 	var rows *sql.Rows
 	var orders []models.Order = []models.Order{}
 
-	switch value.(type) {
-	case int:
-		rows, err = stmt.Query(value.(int))
-	case float64:
-		rows, err = stmt.Query(value.(float64))
-	case bool:
-		rows, err = stmt.Query(value.(bool))
-	case string:
-		rows, err = stmt.Query(value.(string))
-	}
+	rows, err = stmt.Query(id)
 
 	var previousOrderId string
 	var previousArticleName string

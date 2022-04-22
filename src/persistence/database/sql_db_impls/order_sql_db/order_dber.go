@@ -7,5 +7,5 @@ import (
 
 type OrderDber interface {
 	CreateOrder(odto dto.OrderInputDto) error
-	GetOrdersBy(attr string, value interface{}) ([]models.Order, error)
+	GetOrdersByUserId(id string) ([]models.Order, error)
 }
