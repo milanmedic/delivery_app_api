@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
@@ -90,4 +91,29 @@ func (oc *OrderController) GetOrders(c *gin.Context) {
 	}
 
 	c.JSON(200, orders)
+}
+
+func (oc *OrderController) CancelOrder(c *gin.Context) {
+	id := c.Param("id")
+
+	status, err := oc.orderService.GetOrderStatus(id)
+	if err != nil {
+		c.Error(fmt.Errorf("Order cancellation failed. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	if strings.Compare(status, "IN_PROGRESS") == 0 || strings.Compare(status, "COMPLETED") == 0 || strings.Compare(status, "CANCELLED") == 0 {
+		c.Error(fmt.Errorf("Order cancellation failed. Cannot cancel order that is in progress or completed."))
+		c.String(http.StatusBadRequest, "Order cancellation failed. Cannot cancel order that is in progress, completed or cancelled.")
+		return
+	}
+
+	err = oc.orderService.CancelOrder(id)
+	if err != nil {
+		c.Error(fmt.Errorf("Order cancellation failed. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

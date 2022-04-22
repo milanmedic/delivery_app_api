@@ -36,3 +36,15 @@ func (os *OrderService) CreateOrder(odto dto.OrderInputDto) error {
 func (os *OrderService) GetOrdersByUserId(id string) ([]models.Order, error) {
 	return os.repository.GetOrdersByUserId(id)
 }
+
+func (os *OrderService) CancelOrder(id string) error {
+	return os.repository.UpdateProperty("status", "CANCELLED", id)
+}
+
+func (os *OrderService) GetOrderStatus(id string) (string, error) {
+	return os.repository.GetOrderStatus(id)
+}
+
+func (os *OrderService) GetOrderBasketID(id string) (string, error) {
+	return os.repository.GetOrderBasketID(id)
+}

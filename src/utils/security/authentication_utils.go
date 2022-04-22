@@ -59,7 +59,7 @@ func Authenticate(roles ...string) gin.HandlerFunc {
 
 		_, claims, err := jwt_utils.ParseToken(token)
 		if err != nil {
-			c.Error(fmt.Errorf("Error while parsting the token. \nReason: %s", err.Error()))
+			c.Error(fmt.Errorf("Error while parsing the token. \nReason: %s", err.Error()))
 			c.Status(http.StatusInternalServerError)
 			c.Abort()
 			return

@@ -2,6 +2,7 @@ package order_sql_db
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
@@ -44,7 +45,7 @@ func (odb *OrderDb) CreateOrder(odto dto.OrderInputDto) error {
 }
 
 func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
-	stmt, err := odb.dbDriver.Prepare(`select o.id, o.comment, o.accepted,
+	stmt, err := odb.dbDriver.Prepare(`select o.id, o.comment, o.status, o.accepted,
 	ifnull(d.name, '') as 'name', ifnull(d.surname, '') as 'surname',
 	b.price as "total",
 	a.name as "article_name", a.description as "article_description" , a.price as "article_price",
@@ -79,7 +80,8 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 	for rows.Next() {
 		var orderId string
 		var orderComment string
-		var orderStatus bool
+		var orderStatus string
+		var accepted bool
 		var delivererName string
 		var delivererSurname string
 		var city string
@@ -92,7 +94,7 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 		var articlePrice string
 		var articleQuantity int
 
-		if err := rows.Scan(&orderId, &orderComment, &orderStatus, &delivererName, &delivererSurname, &totalPrice, &articleName, &articleDescription, &articlePrice, &articleQuantity, &city, &street, &street_num, &postfix); err != nil {
+		if err := rows.Scan(&orderId, &orderComment, &orderStatus, &accepted, &delivererName, &delivererSurname, &totalPrice, &articleName, &articleDescription, &articlePrice, &articleQuantity, &city, &street, &street_num, &postfix); err != nil {
 			return nil, err
 		}
 		if orderId != previousOrderId {
@@ -101,6 +103,7 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 			o.Id = orderId
 			o.Comment = orderComment
 			o.Status = orderStatus
+			o.Accepted = accepted
 			o.DelivererName = delivererName
 			o.DelivererSurname = delivererSurname
 			o.Address.City = city
@@ -128,4 +131,104 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 	defer stmt.Close()
 
 	return orders, nil
+}
+
+func (odb *OrderDb) DeleteOrder(attr string, value interface{}) error {
+	tx, err := odb.dbDriver.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare(fmt.Sprintf(`DELETE FROM customer_order where %s=;`, attr))
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	defer stmt.Close()
+
+	switch value.(type) {
+	case int:
+		_, err = stmt.Exec(value.(int))
+	case float64:
+		_, err = stmt.Exec(value.(float64))
+	case bool:
+		_, err = stmt.Exec(value.(bool))
+	case string:
+		_, err = stmt.Exec(value.(string))
+	}
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (odb *OrderDb) GetOrderBasketID(id string) (string, error) {
+	stmt, err := odb.dbDriver.Prepare(` SELECT basket from customer_order where id = ?;`)
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+
+	var row *sql.Row
+
+	row = stmt.QueryRow(id)
+
+	var basketID string
+	err = row.Scan(&basketID)
+	if err != nil {
+		return "", nil
+	}
+
+	return basketID, nil
+}
+
+func (odb *OrderDb) GetOrderStatus(id string) (string, error) {
+	stmt, err := odb.dbDriver.Prepare(`SELECT status from customer_order where id = ?;`)
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+
+	var row *sql.Row
+
+	row = stmt.QueryRow(id)
+
+	var basketID string
+	err = row.Scan(&basketID)
+	if err != nil {
+		return "", nil
+	}
+
+	return basketID, nil
+}
+
+func (odb *OrderDb) UpdateProperty(property string, value interface{}, id string) error {
+	stmt, err := odb.dbDriver.Prepare(fmt.Sprintf(`UPDATE customer_order SET %s = ? where customer_order.id = ?;`, property))
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	switch value.(type) {
+	case int:
+		_, err = stmt.Exec(value.(int), id)
+	case float64:
+		_, err = stmt.Exec(value.(float64), id)
+	case bool:
+		_, err = stmt.Exec(value.(bool), id)
+	case string:
+		_, err = stmt.Exec(value.(string), id)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
