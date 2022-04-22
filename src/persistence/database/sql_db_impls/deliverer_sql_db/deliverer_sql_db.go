@@ -52,7 +52,7 @@ func (dDb *DelivererDb) UpdateProperty(property string, value interface{}, id st
 
 	val := reflect.ValueOf(value)
 	ptr := val
-
+	//TODO: Remove reflection
 	switch ptr.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		concreteValue := strconv.FormatInt(ptr.Int(), 10)

@@ -8,4 +8,8 @@ import (
 type OrderRepositer interface {
 	CreateOrder(odto dto.OrderInputDto) error
 	GetOrdersByUserId(id string) ([]models.Order, error)
+	DeleteOrder(attr string, value interface{}) error
+	GetOrderBasketID(id string) (string, error)
+	GetOrderStatus(id string) (string, error)
+	UpdateProperty(property string, value interface{}, id string) error
 }

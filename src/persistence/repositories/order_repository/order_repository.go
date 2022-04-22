@@ -21,3 +21,19 @@ func (or *OrderRepository) CreateOrder(odto dto.OrderInputDto) error {
 func (or *OrderRepository) GetOrdersByUserId(id string) ([]models.Order, error) {
 	return or.db.GetOrdersByUserId(id)
 }
+
+func (or *OrderRepository) DeleteOrder(attr string, value interface{}) error {
+	return or.db.DeleteOrder(attr, value)
+}
+
+func (or *OrderRepository) GetOrderBasketID(id string) (string, error) {
+	return or.db.GetOrderBasketID(id)
+}
+
+func (or *OrderRepository) GetOrderStatus(id string) (string, error) {
+	return or.db.GetOrderStatus(id)
+}
+
+func (or *OrderRepository) UpdateProperty(property string, value interface{}, id string) error {
+	return or.db.UpdateProperty(property, value, id)
+}

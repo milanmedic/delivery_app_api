@@ -9,4 +9,5 @@ import (
 func SetupOrderRoutes(router *gin.Engine, oc *controllers.OrderController) {
 	router.POST("/order", authentication_utils.Authenticate("CUSTOMER"), oc.CreateOrder)
 	router.GET("/orders", authentication_utils.Authenticate("CUSTOMER"), oc.GetOrders)
+	router.PATCH("/order/:id", authentication_utils.Authenticate("CUSTOMER"), oc.CancelOrder)
 }
