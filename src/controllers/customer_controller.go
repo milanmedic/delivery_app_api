@@ -82,7 +82,7 @@ func (cc *CustomerController) Register(c *gin.Context) {
 		}
 	}
 
-	c.Status(204)
+	c.Status(http.StatusCreated)
 	return
 }
 
@@ -232,7 +232,7 @@ func (uc *CustomerController) OAuthRegistration(c *gin.Context) {
 		}
 	}
 
-	c.Status(204)
+	c.Status(http.StatusCreated)
 	return
 }
 

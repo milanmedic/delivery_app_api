@@ -65,7 +65,7 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.Status(http.StatusCreated)
 	return
 }
 

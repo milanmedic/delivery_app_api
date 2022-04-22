@@ -33,7 +33,7 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.Status(http.StatusCreated)
 	return
 }
 
@@ -69,6 +69,6 @@ func (ac *ArticleController) GetAllArticles(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 	}
 
-	c.JSON(200, articles)
+	c.JSON(http.StatusOK, articles)
 	return
 }

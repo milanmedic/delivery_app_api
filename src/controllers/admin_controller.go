@@ -125,7 +125,7 @@ func (ac *AdminController) AddDeliverer(c *gin.Context) {
 		}
 	}
 
-	c.Status(204)
+	c.Status(http.StatusCreated)
 	return
 }
 
