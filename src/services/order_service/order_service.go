@@ -2,6 +2,7 @@ package order_service
 
 import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
+	"delivery_app_api.mmedic.com/m/v2/src/models"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/order_repository"
 	"delivery_app_api.mmedic.com/m/v2/src/services/basket_service"
 	"github.com/google/uuid"
@@ -30,4 +31,8 @@ func (os *OrderService) CreateOrder(odto dto.OrderInputDto) error {
 	}
 
 	return nil
+}
+
+func (os *OrderService) GetOrdersByUsername(username string) ([]models.Order, error) {
+	return os.repository.GetOrdersBy("username", username)
 }
