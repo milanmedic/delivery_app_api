@@ -237,21 +237,21 @@ func (uc *CustomerController) OAuthRegistration(c *gin.Context) {
 }
 
 func (cc *CustomerController) GetCustomerInfo(c *gin.Context) {
-	var id string = c.Param("id")
+	id := c.GetString("user_id")
 
-	adminOut, err := cc.customerService.GetCustomerInfo(id)
+	customerOut, err := cc.customerService.GetCustomerInfo(id)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if adminOut == nil {
+	if customerOut == nil {
 		c.String(http.StatusNotFound, "Customer doesn't exist.")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": adminOut})
+	c.JSON(http.StatusOK, customerOut)
 	return
 }
 

@@ -28,7 +28,7 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/order_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/env_utils"
-
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -56,7 +56,12 @@ func main() {
 	router.Use(gin.Logger())
 	// Recovery middleware recovers from any panics and writes a 500 if there was one.
 	router.Use(gin.Recovery())
-	router.Use(CORSMiddleware())
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AddAllowHeaders("Authorization", "Accept-Type")
+	router.Use(cors.New(config))
+	//router.Use(CORSMiddleware())
 
 	//**************************************************************************
 	// GENERAL ROUTES
@@ -127,7 +132,9 @@ func HandleError(err error) {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 		c.Next()
 	}
 }
