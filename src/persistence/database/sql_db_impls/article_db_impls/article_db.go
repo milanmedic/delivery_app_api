@@ -95,13 +95,15 @@ func (adb *ArticleDb) GetAll() ([]*models.Article, error) {
 		var name string
 		var desc string
 		var price int
-		if err := rows.Scan(&id, &name, &desc, &price); err != nil {
+		var quantity int
+		if err := rows.Scan(&id, &name, &desc, &price, &quantity); err != nil {
 			return nil, err
 		}
 		a.SetId(id)
 		a.SetName(name)
 		a.SetDescription(desc)
 		a.SetPrice(price)
+		a.SetQuantity(quantity)
 		articles = append(articles, &a)
 	}
 	if err != nil {

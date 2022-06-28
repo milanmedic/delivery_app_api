@@ -59,7 +59,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
-	config.AddAllowHeaders("Authorization", "Accept-Type")
+	config.AddAllowHeaders("Authorization", "Accept-Type", "Content-Length", "Accept-Encoding", "Accept", "Content-Type")
 	router.Use(cors.New(config))
 	//router.Use(CORSMiddleware())
 

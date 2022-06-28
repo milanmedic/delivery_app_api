@@ -5,7 +5,7 @@ import (
 	"net/mail"
 	"strings"
 
-	"delivery_app_api.mmedic.com/m/v2/src/models"
+	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 )
 
@@ -83,10 +83,7 @@ func ValidateStreet(street string) error {
 	return nil
 }
 
-func ValidateAddress(addr models.Address) bool {
-	if addr.Id == 0 {
-		return false
-	}
+func ValidateAddress(addr dto.AddressInputDto) bool {
 
 	if strings.Compare(addr.City, "") == 0 {
 		return false

@@ -23,6 +23,8 @@ func CreateOrderController(os order_service.OrderServicer, as addr_service.AddrS
 
 func (oc *OrderController) CreateOrder(c *gin.Context) {
 	var orderDto dto.OrderInputDto
+	orderDto.CustomerID = c.GetString("user_id")
+
 	err := c.BindJSON(&orderDto)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
@@ -33,15 +35,18 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 	//TODO: Refactor all address adding logic
 	var addrId int
 	addr, err := oc.addrService.GetAddr(orderDto.Address)
-	valid := validations.ValidateAddress(*addr)
-	if !valid {
-		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+
+	if addr == nil {
+		valid := validations.ValidateAddress(orderDto.Address)
+		if !valid {
+			c.Error(fmt.Errorf("error while validating for address. \nReason: %s", err.Error()))
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	if err != nil {
-		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("error while searching for address. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -49,7 +54,7 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 	if addr == nil {
 		addrId, err = oc.addrService.CreateAddress(orderDto.Address)
 		if err != nil {
-			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
+			c.Error(fmt.Errorf("error while creating an address. \nReason: %s", err.Error()))
 			c.String(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -60,7 +65,7 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 
 	err = oc.orderService.CreateOrder(orderDto)
 	if err != nil {
-		c.Error(fmt.Errorf("Error placing an order. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("error placing an order. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -73,14 +78,14 @@ func (oc *OrderController) GetOrders(c *gin.Context) {
 	id, ok := c.Get("user_id")
 
 	if !ok {
-		c.Error(fmt.Errorf("User not provided in token."))
+		c.Error(fmt.Errorf("user not provided in token."))
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	orders, err := oc.orderService.GetOrdersByUserId(id.(string))
 	if err != nil {
-		c.Error(fmt.Errorf("Error retrieving orders. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("error retrieving orders. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -98,19 +103,19 @@ func (oc *OrderController) CancelOrder(c *gin.Context) {
 
 	status, err := oc.orderService.GetOrderStatus(id)
 	if err != nil {
-		c.Error(fmt.Errorf("Order cancellation failed. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("order cancellation failed. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	if strings.Compare(status, "IN_PROGRESS") == 0 || strings.Compare(status, "COMPLETED") == 0 || strings.Compare(status, "CANCELLED") == 0 {
-		c.Error(fmt.Errorf("Order cancellation failed. Cannot cancel order that is in progress or completed."))
+		c.Error(fmt.Errorf("order cancellation failed. Cannot cancel order that is in progress or completed"))
 		c.String(http.StatusBadRequest, "Order cancellation failed. Cannot cancel order that is in progress, completed or cancelled.")
 		return
 	}
 
 	err = oc.orderService.CancelOrder(id)
 	if err != nil {
-		c.Error(fmt.Errorf("Order cancellation failed. \nReason: %s", err.Error()))
+		c.Error(fmt.Errorf("order cancellation failed. \nReason: %s", err.Error()))
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
