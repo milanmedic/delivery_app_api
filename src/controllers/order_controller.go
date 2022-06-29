@@ -27,7 +27,7 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 
 	err := c.BindJSON(&orderDto)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, "Bad Request.")
 		return
 	}
 
@@ -40,14 +40,14 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 		valid := validations.ValidateAddress(orderDto.Address)
 		if !valid {
 			c.Error(fmt.Errorf("error while validating for address. \nReason: %s", err.Error()))
-			c.String(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
 
 	if err != nil {
 		c.Error(fmt.Errorf("error while searching for address. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -55,7 +55,7 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 		addrId, err = oc.addrService.CreateAddress(orderDto.Address)
 		if err != nil {
 			c.Error(fmt.Errorf("error while creating an address. \nReason: %s", err.Error()))
-			c.String(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 		orderDto.Address.Id = addrId
@@ -66,19 +66,18 @@ func (oc *OrderController) CreateOrder(c *gin.Context) {
 	err = oc.orderService.CreateOrder(orderDto)
 	if err != nil {
 		c.Error(fmt.Errorf("error placing an order. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.Status(http.StatusCreated)
-	return
+	c.JSON(http.StatusCreated, "Created.")
 }
 
 func (oc *OrderController) GetOrders(c *gin.Context) {
 	id, ok := c.Get("user_id")
 
 	if !ok {
-		c.Error(fmt.Errorf("user not provided in token."))
+		c.Error(fmt.Errorf("user not provided in token"))
 		c.Status(http.StatusInternalServerError)
 		return
 	}

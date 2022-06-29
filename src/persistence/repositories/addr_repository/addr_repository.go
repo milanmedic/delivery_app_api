@@ -25,3 +25,7 @@ func (ar *AddrRepository) GetAddr(a dto.AddressInputDto) (*models.Address, error
 func (ar *AddrRepository) GetById(id string) (*models.Address, error) {
 	return ar.db.GetByID(id)
 }
+
+func (ar *AddrRepository) GetUserAddress(userId string) (*dto.AddressOutputDto, error) {
+	return ar.db.GetUserAddress(userId)
+}

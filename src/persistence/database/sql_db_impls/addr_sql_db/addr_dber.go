@@ -9,4 +9,5 @@ type AddrDber interface {
 	GetByID(id string) (*models.Address, error)
 	AddOne(u dto.AddressInputDto) (int, error)
 	GetAddr(a dto.AddressInputDto) (*models.Address, error)
+	GetUserAddress(userId string) (*dto.AddressOutputDto, error)
 }

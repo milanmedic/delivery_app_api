@@ -88,6 +88,10 @@ func main() {
 	routes.SetupCustomerRoutes(router, cc)
 
 	//**************************************************************************
+	// ADDR ROUTES
+	addrC := controllers.CreateAddrController(as)
+	routes.SetupAddrRoutes(router, addrC)
+	//**************************************************************************
 	// DELIVERER ROUTES
 	ddb := deliverer_sql_db.CreateDelivererDb(db)
 	dr := deliverer_repository.CreateDelivererRepository(ddb)

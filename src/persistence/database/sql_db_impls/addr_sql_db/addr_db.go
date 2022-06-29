@@ -103,3 +103,34 @@ func (ad *AddrDb) AddOne(addr dto.AddressInputDto) (int, error) {
 
 	return int(id), nil
 }
+
+func (ad *AddrDb) GetUserAddress(userId string) (*dto.AddressOutputDto, error) {
+	stmt, err := ad.dbDriver.Prepare(`SELECT address.city, address.street, address.street_num, address.postfix from address
+																		inner join customer
+																		on address.id = customer.address
+																	  WHERE customer.id = ?;`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(userId)
+
+	var street string
+	var city string
+	var streetNum int
+	var postfix string
+	err = row.Scan(&city, &street, &streetNum, &postfix)
+	if err != nil {
+		return nil, nil
+	}
+
+	addr := new(dto.AddressOutputDto)
+	addr.City = city
+	addr.Street = street
+	addr.StreetNum = streetNum
+	addr.Postfix = postfix
+
+	return addr, nil
+}
