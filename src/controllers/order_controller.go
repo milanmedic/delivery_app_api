@@ -78,14 +78,14 @@ func (oc *OrderController) GetOrders(c *gin.Context) {
 
 	if !ok {
 		c.Error(fmt.Errorf("user not provided in token"))
-		c.Status(http.StatusInternalServerError)
+		c.Status(http.StatusUnauthorized)
 		return
 	}
 
 	orders, err := oc.orderService.GetOrdersByUserId(id.(string))
 	if err != nil {
 		c.Error(fmt.Errorf("error retrieving orders. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -103,21 +103,22 @@ func (oc *OrderController) CancelOrder(c *gin.Context) {
 	status, err := oc.orderService.GetOrderStatus(id)
 	if err != nil {
 		c.Error(fmt.Errorf("order cancellation failed. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	if strings.Compare(status, "IN_PROGRESS") == 0 || strings.Compare(status, "COMPLETED") == 0 || strings.Compare(status, "CANCELLED") == 0 {
 		c.Error(fmt.Errorf("order cancellation failed. Cannot cancel order that is in progress or completed"))
-		c.String(http.StatusBadRequest, "Order cancellation failed. Cannot cancel order that is in progress, completed or cancelled.")
+		c.JSON(http.StatusBadRequest, "Order cancellation failed. Cannot cancel order that is in progress, completed or cancelled.")
 		return
 	}
 
 	err = oc.orderService.CancelOrder(id)
 	if err != nil {
 		c.Error(fmt.Errorf("order cancellation failed. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	// if status noContent present, there is no body in req
+	c.JSON(http.StatusOK, "Cancelled")
 }

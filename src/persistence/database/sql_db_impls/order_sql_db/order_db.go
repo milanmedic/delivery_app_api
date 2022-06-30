@@ -111,6 +111,14 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 			o.Address.StreetNum = street_num
 			o.Address.Postfix = postfix
 			o.Basket.Price = totalPrice
+			previousArticleName = articleName
+			ba = new(dto.BasketArticleOutput)
+			ba.Name = articleName
+			ba.Description = articleDescription
+			ba.Price = articlePrice
+			ba.Quantity = articleQuantity
+			o.Basket.Articles = append(o.Basket.Articles, *ba)
+		} else {
 			if strings.Compare(articleName, previousArticleName) != 0 {
 				previousArticleName = articleName
 				ba = new(dto.BasketArticleOutput)
@@ -119,6 +127,7 @@ func (odb *OrderDb) GetOrdersByUserId(id string) ([]models.Order, error) {
 				ba.Price = articlePrice
 				ba.Quantity = articleQuantity
 				o.Basket.Articles = append(o.Basket.Articles, *ba)
+				orders = orders[:len(orders)-1]
 			}
 		}
 
