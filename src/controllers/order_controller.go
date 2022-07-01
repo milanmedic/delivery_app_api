@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
+	"delivery_app_api.mmedic.com/m/v2/src/models"
 	"delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/order_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
@@ -121,4 +122,37 @@ func (oc *OrderController) CancelOrder(c *gin.Context) {
 
 	// if status noContent present, there is no body in req
 	c.JSON(http.StatusOK, "Cancelled")
+}
+
+func (oc *OrderController) GetAllOrders(c *gin.Context) {
+	deliveryStatus := c.Query("delivery_status")
+	accepted := c.Query("accepted")
+
+	var orders []models.Order
+	var err error
+	if strings.Compare(deliveryStatus, "") == 0 && strings.Compare(accepted, "") == 0 {
+		orders, err = oc.orderService.GetAllOrders("")
+	} else if strings.Compare(deliveryStatus, "") != 0 && strings.Compare(accepted, "") == 0 {
+		orders, err = oc.orderService.GetAllOrders(deliveryStatus)
+	} else {
+		if strings.Compare(accepted, "true") == 0 {
+			accepted = "1"
+		} else {
+			accepted = "0"
+		}
+		orders, err = oc.orderService.GetAllOrders(deliveryStatus, accepted)
+	}
+
+	if err != nil {
+		c.Error(fmt.Errorf("error retrieving orders. \nReason: %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(orders) <= 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(200, orders)
 }

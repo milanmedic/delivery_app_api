@@ -241,3 +241,166 @@ func (odb *OrderDb) UpdateProperty(property string, value interface{}, id string
 
 	return nil
 }
+
+var matchAllOrders string = `select o.id, o.comment, o.status, o.accepted,
+ifnull(d.name, '') as 'name', ifnull(d.surname, '') as 'surname',
+b.price as "total",
+a.name as "article_name", a.description as "article_description" , a.price as "article_price",
+ab.article_quantity as "article_quantity",
+addr.city, addr.street, addr.street_num, addr.postfix
+from customer_order o
+inner join customer c
+on o.customer = c.id
+left join deliverer d
+on o.deliverer = d.id
+inner join basket b
+on o.basket = b.id
+inner join article_basket ab
+on b.id = ab.basket
+inner join article a
+on ab.article = a.id
+inner join address addr
+on addr.id = o.address;`
+
+var matchOnStatusAndAcceptance string = `select o.id, o.comment, o.status, o.accepted,
+ifnull(d.name, '') as 'name', ifnull(d.surname, '') as 'surname',
+b.price as "total",
+a.name as "article_name", a.description as "article_description" , a.price as "article_price",
+ab.article_quantity as "article_quantity",
+addr.city, addr.street, addr.street_num, addr.postfix
+from customer_order o
+inner join customer c
+on o.customer = c.id
+left join deliverer d
+on o.deliverer = d.id
+inner join basket b
+on o.basket = b.id
+inner join article_basket ab
+on b.id = ab.basket
+inner join article a
+on ab.article = a.id
+inner join address addr
+on addr.id = o.address
+where o.status LIKE ? AND o.accepted=?;
+`
+
+var matchOnStatus string = `select o.id, o.comment, o.status, o.accepted,
+ifnull(d.name, '') as 'name', ifnull(d.surname, '') as 'surname',
+b.price as "total",
+a.name as "article_name", a.description as "article_description" , a.price as "article_price",
+ab.article_quantity as "article_quantity",
+addr.city, addr.street, addr.street_num, addr.postfix
+from customer_order o
+inner join customer c
+on o.customer = c.id
+left join deliverer d
+on o.deliverer = d.id
+inner join basket b
+on o.basket = b.id
+inner join article_basket ab
+on b.id = ab.basket
+inner join article a
+on ab.article = a.id
+inner join address addr
+on addr.id = o.address
+where o.status LIKE ?;
+`
+
+func (odb *OrderDb) GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error) {
+
+	var stmt *sql.Stmt
+	var err error
+
+	// NO QP
+	if strings.Compare(deliveryStatus, "") == 0 && len(accepted) <= 0 {
+		stmt, err = odb.dbDriver.Prepare(matchAllOrders)
+		// ONLY STATUS
+	} else if len(accepted) <= 0 {
+		stmt, err = odb.dbDriver.Prepare(matchOnStatus)
+		// ALL
+	} else {
+		stmt, err = odb.dbDriver.Prepare(matchOnStatusAndAcceptance)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	var rows *sql.Rows
+	var orders []models.Order = []models.Order{}
+
+	if strings.Compare(deliveryStatus, "") == 0 && len(accepted) <= 0 {
+		rows, err = stmt.Query()
+	} else if strings.Compare(deliveryStatus, "") != 0 && len(accepted) <= 0 {
+		rows, err = stmt.Query(deliveryStatus)
+	} else {
+		rows, err = stmt.Query(deliveryStatus, accepted[0])
+	}
+
+	var previousOrderId string
+	var previousArticleName string
+	var o *models.Order
+	var ba *dto.BasketArticleOutput
+	for rows.Next() {
+		var orderId string
+		var orderComment string
+		var orderStatus string
+		var accepted bool
+		var delivererName string
+		var delivererSurname string
+		var city string
+		var street string
+		var street_num int
+		var postfix string
+		var totalPrice int
+		var articleName string
+		var articleDescription string
+		var articlePrice string
+		var articleQuantity int
+
+		if err := rows.Scan(&orderId, &orderComment, &orderStatus, &accepted, &delivererName, &delivererSurname, &totalPrice, &articleName, &articleDescription, &articlePrice, &articleQuantity, &city, &street, &street_num, &postfix); err != nil {
+			return nil, err
+		}
+		if orderId != previousOrderId {
+			previousOrderId = orderId
+			o = new(models.Order)
+			o.Id = orderId
+			o.Comment = orderComment
+			o.Status = orderStatus
+			o.Accepted = accepted
+			o.DelivererName = delivererName
+			o.DelivererSurname = delivererSurname
+			o.Address.City = city
+			o.Address.Street = street
+			o.Address.StreetNum = street_num
+			o.Address.Postfix = postfix
+			o.Basket.Price = totalPrice
+			previousArticleName = articleName
+			ba = new(dto.BasketArticleOutput)
+			ba.Name = articleName
+			ba.Description = articleDescription
+			ba.Price = articlePrice
+			ba.Quantity = articleQuantity
+			o.Basket.Articles = append(o.Basket.Articles, *ba)
+		} else {
+			if strings.Compare(articleName, previousArticleName) != 0 {
+				previousArticleName = articleName
+				ba = new(dto.BasketArticleOutput)
+				ba.Name = articleName
+				ba.Description = articleDescription
+				ba.Price = articlePrice
+				ba.Quantity = articleQuantity
+				o.Basket.Articles = append(o.Basket.Articles, *ba)
+				orders = orders[:len(orders)-1]
+			}
+		}
+
+		orders = append(orders, *o)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
+
+	return orders, nil
+}

@@ -48,3 +48,7 @@ func (os *OrderService) GetOrderStatus(id string) (string, error) {
 func (os *OrderService) GetOrderBasketID(id string) (string, error) {
 	return os.repository.GetOrderBasketID(id)
 }
+
+func (os *OrderService) GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error) {
+	return os.repository.GetAllOrders(deliveryStatus, accepted...)
+}

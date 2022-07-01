@@ -37,3 +37,7 @@ func (or *OrderRepository) GetOrderStatus(id string) (string, error) {
 func (or *OrderRepository) UpdateProperty(property string, value interface{}, id string) error {
 	return or.db.UpdateProperty(property, value, id)
 }
+
+func (or *OrderRepository) GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error) {
+	return or.db.GetAllOrders(deliveryStatus, accepted...)
+}
