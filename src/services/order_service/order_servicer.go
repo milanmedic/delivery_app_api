@@ -12,4 +12,5 @@ type OrderServicer interface {
 	CancelOrder(id string) error
 	GetOrderBasketID(id string) (string, error)
 	GetOrderStatus(id string) (string, error)
+	AcceptOrder(orderID, delivererID string) error
 }

@@ -52,3 +52,16 @@ func (os *OrderService) GetOrderBasketID(id string) (string, error) {
 func (os *OrderService) GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error) {
 	return os.repository.GetAllOrders(deliveryStatus, accepted...)
 }
+
+func (os *OrderService) AcceptOrder(orderID, delivererID string) error {
+	err := os.repository.UpdateProperty("deliverer", delivererID, orderID)
+	if err != nil {
+		return err
+	}
+	err = os.repository.UpdateProperty("accepted", true, orderID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

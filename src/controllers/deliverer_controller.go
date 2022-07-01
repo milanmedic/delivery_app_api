@@ -8,6 +8,7 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	addr_service "delivery_app_api.mmedic.com/m/v2/src/services/addr_service"
 	"delivery_app_api.mmedic.com/m/v2/src/services/deliverer_service"
+	"delivery_app_api.mmedic.com/m/v2/src/services/order_service"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/jwt_utils"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/security"
 	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
@@ -17,10 +18,11 @@ import (
 type DelivererController struct {
 	delivererService deliverer_service.DelivererServicer
 	addrService      addr_service.AddrServicer
+	orderService     order_service.OrderServicer
 }
 
-func CreateDelivererController(ds deliverer_service.DelivererServicer, as addr_service.AddrServicer) *DelivererController {
-	return &DelivererController{delivererService: ds, addrService: as}
+func CreateDelivererController(ds deliverer_service.DelivererServicer, as addr_service.AddrServicer, os order_service.OrderServicer) *DelivererController {
+	return &DelivererController{delivererService: ds, addrService: as, orderService: os}
 }
 
 func (dc *DelivererController) DelivererLogin(c *gin.Context) {
@@ -144,4 +146,30 @@ func (dc *DelivererController) UpdateDeliverer(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 	return
+}
+
+func (dc *DelivererController) AcceptOrder(c *gin.Context) {
+	var orderID string = c.Param("id")
+	delivererID := c.GetString("user_id")
+
+	// AFTER RANDOM TIME FROM ORDER ACCEPTANCE
+	// CREATE A NEW ROUTINE TO UPDATE ORDER DELIVERY TIME
+	// UPDATE DELIVERY TIME
+
+	// CREATE A NEW ROUTINE FROM MAIN
+	// UPDATE ALL ROUTES WHERE ORDER_ACCEPT_TIME == ORDER_DELIVERY_TIME
+
+	//USE SERVER SIDE EVENTS TO SEND RANDOM DELIVERY TIME TO USER
+	//https://itnext.io/create-go-service-the-easy-way-iv-c1f6b91401c1
+	//https://medium.com/yemeksepeti-teknoloji/what-is-server-sent-events-sse-and-how-to-implement-it-904938bffd73
+	//https://thoughtbot.com/blog/writing-a-server-sent-events-server-in-go
+
+	err := dc.orderService.AcceptOrder(orderID, delivererID)
+	if err != nil {
+		c.Error(fmt.Errorf("error while accepting the order. \nReason: %s", err.Error()))
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusAccepted, fmt.Sprintf("Order %s accepted", orderID))
 }

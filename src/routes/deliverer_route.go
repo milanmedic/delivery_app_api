@@ -11,4 +11,5 @@ func SetupDelivererRoutes(router *gin.Engine, dc *controllers.DelivererControlle
 	router.GET("/deliverer/:id", authentication_utils.Authenticate("DELIVERER"), dc.GetDelivererInfo)
 
 	router.PUT("/deliverer/:id", authentication_utils.Authenticate("DELIVERER"), dc.UpdateDeliverer)
+	router.PATCH("/deliverer/order/:id", authentication_utils.Authenticate("DELIVERER"), dc.AcceptOrder)
 }

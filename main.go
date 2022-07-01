@@ -92,21 +92,6 @@ func main() {
 	addrC := controllers.CreateAddrController(as)
 	routes.SetupAddrRoutes(router, addrC)
 	//**************************************************************************
-	// DELIVERER ROUTES
-	ddb := deliverer_sql_db.CreateDelivererDb(db)
-	dr := deliverer_repository.CreateDelivererRepository(ddb)
-	ds := deliverer_service.CreateDelivererService(dr)
-	dc := controllers.CreateDelivererController(ds, as)
-	routes.SetupDelivererRoutes(router, dc)
-
-	//**************************************************************************
-	// ADMIN ROUTES
-	admdb := admin_sql_db.CreateAdminDb(db)
-	admr := admin_repository.CreateAdminRepository(admdb)
-	ads := admin_service.CreateAdminService(admr)
-	adc := controllers.CreateAdminController(ads, cs, as, ds)
-	routes.SetupAdminRoutes(router, adc)
-	//**************************************************************************
 
 	//**************************************************************************
 	// ORDER ROUTES
@@ -118,6 +103,22 @@ func main() {
 	os := order_service.CreateOrderService(or, bs)
 	oc := controllers.CreateOrderController(os, as)
 	routes.SetupOrderRoutes(router, oc)
+	//**************************************************************************
+
+	// DELIVERER ROUTES
+	ddb := deliverer_sql_db.CreateDelivererDb(db)
+	dr := deliverer_repository.CreateDelivererRepository(ddb)
+	ds := deliverer_service.CreateDelivererService(dr)
+	dc := controllers.CreateDelivererController(ds, as, os)
+	routes.SetupDelivererRoutes(router, dc)
+
+	//**************************************************************************
+	// ADMIN ROUTES
+	admdb := admin_sql_db.CreateAdminDb(db)
+	admr := admin_repository.CreateAdminRepository(admdb)
+	ads := admin_service.CreateAdminService(admr)
+	adc := controllers.CreateAdminController(ads, cs, as, ds)
+	routes.SetupAdminRoutes(router, adc)
 	//**************************************************************************
 
 	// RUN SERVER
