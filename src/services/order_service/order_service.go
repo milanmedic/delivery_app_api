@@ -65,3 +65,24 @@ func (os *OrderService) AcceptOrder(orderID, delivererID string) error {
 
 	return nil
 }
+
+func (os *OrderService) CompleteOrder(orderID string) error {
+	err := os.repository.UpdateProperty("status", "COMPLETED", orderID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (os *OrderService) GetOrder(orderID string) (*models.Order, error) {
+	return os.repository.GetOrder(orderID)
+}
+
+func (os *OrderService) GetOrdersByDelivererId(delivererID string) ([]models.Order, error) {
+	return os.repository.GetOrdersByDelivererId(delivererID)
+}
+
+func (os *OrderService) UpdateProperty(property string, value interface{}, id string) error {
+	return os.repository.UpdateProperty(property, value, id)
+}

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS customer_order (
     "basket" TEXT NOT NULL,
     "accepted" BOOLEAN DEFAULT FALSE,
     "deliverer" TEXT,
-    "status" TEXT DEFAULT "NOT COMPLETE"
+    "status" TEXT DEFAULT "PENDING",
     "customer" TEXT NOT NULL,
     PRIMARY KEY("id" autoincrement),
     FOREIGN KEY("address")

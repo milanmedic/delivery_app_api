@@ -13,4 +13,5 @@ type DelivererServicer interface {
 	Exists(email string) (bool, error)
 	GetDelivererInfo(id string) (*dto.DelivererOutputDto, error)
 	UpdateDeliverer(id string, ddto *dto.DelivererInputDto) (bool, error)
+	GetAll() ([]dto.DeliverersProfileDto, error)
 }

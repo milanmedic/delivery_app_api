@@ -1,16 +1,15 @@
 package models
 
 type Customer struct {
-	Id                 string
-	Username           string
-	Name               string
-	Surname            string
-	Email              string
-	Password           string
-	DateOfBirth        string
-	Address            *Address
-	Role               string
-	VerificationStatus string
+	Id          string
+	Username    string
+	Name        string
+	Surname     string
+	Email       string
+	Password    string
+	DateOfBirth string
+	Address     *Address
+	Role        string
 }
 
 func CreateCustomer() *Customer {
@@ -43,7 +42,4 @@ func (u *Customer) SetAddress(addr *Address) {
 }
 func (u *Customer) SetRole(role string) {
 	u.Role = role
-}
-func (u *Customer) SetVerificationStatus(st string) {
-	u.VerificationStatus = st
 }

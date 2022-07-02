@@ -93,9 +93,5 @@ func ValidateAddress(addr dto.AddressInputDto) bool {
 		return false
 	}
 
-	if addr.StreetNum == 0 {
-		return false
-	}
-
 	return true
 }

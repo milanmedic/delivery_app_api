@@ -18,7 +18,7 @@ func CreateCustomerDb(dbDriver *dbdrivers.DeliveryAppDb) *CustomerDb {
 
 func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, error) {
 	stmt, err := cdb.dbDriver.Prepare(fmt.Sprintf(` SELECT c.id, c.username, c.name, c.surname, c.email, c.password, c.date_of_birth,
-	c.role, c.verification_status, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE c.%s = ?;`, attr))
+	c.role, a.city, a.street, a.street_num, a.postfix, a.id from customer c inner join address a on a.id = c.address WHERE c.%s = ?;`, attr))
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +47,11 @@ func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, 
 	var dateOfBirth string
 	var addrId int
 	var role string
-	var status string
 	var city string
 	var street string
 	var streetNum int
 	var postfix string
-	err = row.Scan(&id, &username, &name, &surname, &email, &password, &dateOfBirth, &role, &status, &city, &street, &streetNum, &postfix, &addrId)
+	err = row.Scan(&id, &username, &name, &surname, &email, &password, &dateOfBirth, &role, &city, &street, &streetNum, &postfix, &addrId)
 	if err != nil {
 		return nil, nil
 	}
@@ -67,7 +66,6 @@ func (cdb *CustomerDb) GetBy(attr string, value interface{}) (*models.Customer, 
 	customer.SetPassword(password)
 	customer.SetDateOfBirth(dateOfBirth)
 	customer.SetRole(role)
-	customer.SetVerificationStatus(status)
 
 	customer.SetAddress(addr)
 
@@ -80,14 +78,14 @@ func (cdb *CustomerDb) AddOne(u models.Customer) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO customer(id, username, name, surname, email, password, date_of_birth, address, role, verification_status) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`)
+	stmt, err := tx.Prepare(`INSERT INTO customer(id, username, name, surname, email, password, date_of_birth, address, role) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);`)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(u.Id, u.Username, u.Name, u.Surname, u.Email, u.Password, u.DateOfBirth, u.Address.Id, u.Role, u.VerificationStatus)
+	_, err = stmt.Exec(u.Id, u.Username, u.Name, u.Surname, u.Email, u.Password, u.DateOfBirth, u.Address.Id, u.Role)
 	if err != nil {
 		_ = tx.Rollback()
 		return err

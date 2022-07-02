@@ -34,7 +34,6 @@ func (cs *CustomerService) CreateCustomer(ud dto.CustomerInputDto) error {
 	customer.SetDateOfBirth(ud.DateOfBirth)
 	customer.SetAddress(addr)
 	customer.SetRole("CUSTOMER")
-	customer.SetVerificationStatus("UNVERIFIED")
 
 	return cs.repository.CreateCustomer(customer)
 }

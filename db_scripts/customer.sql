@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS customer (
     "date_of_birth" TEXT,
     "address" INTEGER NOT NULL,
     "role" TEXT NOT NULL,
-    "verification_status" TEXT DEFAULT "UNVERIFIED",
     PRIMARY KEY("id"),
     FOREIGN KEY("address")
         REFERENCES address(id)

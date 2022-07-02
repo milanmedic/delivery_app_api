@@ -41,8 +41,9 @@ func (adb *ArticleDb) GetBy(attr string, value interface{}) (*models.Article, er
 	var name string
 	var description string
 	var price int
+	var quantity int
 
-	err = row.Scan(&id, &name, &description, &price)
+	err = row.Scan(&id, &name, &description, &price, &quantity)
 	if err != nil {
 		return nil, nil
 	}
@@ -51,6 +52,7 @@ func (adb *ArticleDb) GetBy(attr string, value interface{}) (*models.Article, er
 	article.SetName(name)
 	article.SetDescription(description)
 	article.SetPrice(price)
+	article.SetQuantity(quantity)
 
 	return article, nil
 }
@@ -148,6 +150,21 @@ func (adb *ArticleDb) UpdateProperty(property string, value interface{}, id int)
 		_, err = stmt.Exec(value.(string), id)
 	}
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (adb *ArticleDb) DeleteArticle(id int) error {
+	stmt, err := adb.dbDriver.Prepare(`DELETE FROM ARTICLE WHERE id =?`)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
 	if err != nil {
 		return err
 	}

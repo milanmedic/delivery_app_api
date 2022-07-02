@@ -40,3 +40,7 @@ func (as *ArticleService) UpdateProperty(property string, value interface{}, id 
 func (as *ArticleService) DecrementQuantity(value int, id int) error {
 	return as.repository.DecrementQuantity(value, id)
 }
+
+func (as *ArticleService) DeleteArticle(id int) error {
+	return as.repository.DeleteArticle(id)
+}

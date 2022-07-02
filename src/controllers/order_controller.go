@@ -91,7 +91,7 @@ func (oc *OrderController) GetOrders(c *gin.Context) {
 	}
 
 	if len(orders) <= 0 {
-		c.Status(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, orders)
 		return
 	}
 
@@ -143,6 +143,24 @@ func (oc *OrderController) GetAllOrders(c *gin.Context) {
 		orders, err = oc.orderService.GetAllOrders(deliveryStatus, accepted)
 	}
 
+	if err != nil {
+		c.Error(fmt.Errorf("error retrieving orders. \nReason: %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if len(orders) <= 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(200, orders)
+}
+
+func (oc *OrderController) GetAllDelivererOrders(c *gin.Context) {
+	id := c.GetString("user_id")
+
+	orders, err := oc.orderService.GetOrdersByDelivererId(id)
 	if err != nil {
 		c.Error(fmt.Errorf("error retrieving orders. \nReason: %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, err.Error())

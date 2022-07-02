@@ -13,4 +13,8 @@ type OrderServicer interface {
 	GetOrderBasketID(id string) (string, error)
 	GetOrderStatus(id string) (string, error)
 	AcceptOrder(orderID, delivererID string) error
+	CompleteOrder(orderID string) error
+	GetOrder(orderID string) (*models.Order, error)
+	GetOrdersByDelivererId(delivererID string) ([]models.Order, error)
+	UpdateProperty(property string, value interface{}, id string) error
 }

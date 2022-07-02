@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	dbdrivers "delivery_app_api.mmedic.com/m/v2/src/persistence/database/db_drivers/sql_driver"
 )
@@ -160,4 +161,62 @@ func (dDb *DelivererDb) Update(d *models.Deliverer) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (dDb *DelivererDb) GetAll() ([]dto.DeliverersProfileDto, error) {
+	stmt, err := dDb.dbDriver.Prepare(`select d.id, d.name, d.surname, d.username,
+	d.email, d.date_of_birth, d.delivery_in_progress, d.verification_status,
+	a.city, a.street, a.street_num, a.postfix from deliverer d
+	inner join address a
+	on d.address = a.id;`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	var deliverers []dto.DeliverersProfileDto = []dto.DeliverersProfileDto{}
+
+	rows, err = stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var deliverer *dto.DeliverersProfileDto = new(dto.DeliverersProfileDto)
+		var id string
+		var name string
+		var username string
+		var surname string
+		var email string
+		var dateOfBirth string
+		var deliveryInProgress bool
+		var city string
+		var street string
+		var streetNum int
+		var postfix string
+		var verificationStatus string
+
+		if err := rows.Scan(&id, &name, &surname, &username, &email, &dateOfBirth, &deliveryInProgress, &verificationStatus, &city, &street, &streetNum, &postfix); err != nil {
+			return nil, err
+		}
+
+		deliverer.Id = id
+		deliverer.Name = name
+		deliverer.Surname = surname
+		deliverer.Username = username
+		deliverer.Email = email
+		deliverer.DateOfBirth = dateOfBirth
+		deliverer.DeliveryInProgess = deliveryInProgress
+		deliverer.VerificationStatus = verificationStatus
+		deliverer.Address = new(dto.AddressOutputDto)
+		deliverer.Address.City = city
+		deliverer.Address.Street = street
+		deliverer.Address.StreetNum = streetNum
+		deliverer.Address.Postfix = postfix
+
+		deliverers = append(deliverers, *deliverer)
+	}
+
+	return deliverers, nil
 }

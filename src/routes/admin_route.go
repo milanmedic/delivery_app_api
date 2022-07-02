@@ -12,7 +12,7 @@ func SetupAdminRoutes(router *gin.Engine, ac *controllers.AdminController) {
 	router.GET("/admin/:id", authentication_utils.Authenticate("ADMIN"), ac.GetAdminInfo)
 	router.PUT("/admin/:id", authentication_utils.Authenticate("ADMIN"), ac.UpdateAdmin)
 
-	router.POST("/admin/deliverer", authentication_utils.Authenticate("ADMIN"), ac.AddDeliverer)
-	router.PATCH("/admin/customer/verification", authentication_utils.Authenticate("ADMIN"), ac.VerifyCustomer)
+	router.GET("/admin/deliverers", authentication_utils.Authenticate("ADMIN"), ac.GetAllDeliverers)
+
 	router.PATCH("/admin/deliverer/verification", authentication_utils.Authenticate("ADMIN"), ac.VerifyDeliverer)
 }

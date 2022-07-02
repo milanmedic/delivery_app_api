@@ -152,3 +152,7 @@ func (ds *DelivererService) UpdateDeliverer(id string, ddto *dto.DelivererInputD
 
 	return ds.repository.Update(deliverer)
 }
+
+func (ds *DelivererService) GetAll() ([]dto.DeliverersProfileDto, error) {
+	return ds.repository.GetAll()
+}

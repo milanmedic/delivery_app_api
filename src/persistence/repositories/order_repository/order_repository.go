@@ -41,3 +41,11 @@ func (or *OrderRepository) UpdateProperty(property string, value interface{}, id
 func (or *OrderRepository) GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error) {
 	return or.db.GetAllOrders(deliveryStatus, accepted...)
 }
+
+func (or *OrderRepository) GetOrder(id string) (*models.Order, error) {
+	return or.db.GetOrder(id)
+}
+
+func (or *OrderRepository) GetOrdersByDelivererId(delivererID string) ([]models.Order, error) {
+	return or.db.GetOrdersByDelivererId(delivererID)
+}

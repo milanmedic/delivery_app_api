@@ -92,12 +92,41 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
+	if authHeader == nil {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	if len(authHeader.IDToken) <= 0 {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
 	token := strings.Split(authHeader.IDToken, " ")[1]
+
+	valid, err := jwt_utils.ValidateToken(token)
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.Status(http.StatusUnauthorized)
+			c.Abort()
+			return
+		}
+		c.Status(http.StatusBadRequest)
+		c.Abort()
+		return
+	}
+
+	if !valid {
+		c.Status(http.StatusUnauthorized)
+		c.Abort()
+		return
+	}
 
 	_, claims, err := jwt_utils.ParseToken(token)
 	if err != nil {
 		c.Error(fmt.Errorf("Error while parsting the token. \nReason: %s", err.Error()))
 		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 24*time.Hour {
@@ -114,5 +143,4 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": refreshedToken})
-	return
 }

@@ -10,4 +10,5 @@ func SetupArticleRoutes(router *gin.Engine, ac *controllers.ArticleController) {
 	router.POST("/article", authentication_utils.Authenticate("ADMIN"), ac.CreateArticle)
 	router.GET("/article/:id", ac.GetArticle)
 	router.GET("/articles", ac.GetAllArticles)
+	router.DELETE("/article/:id", authentication_utils.Authenticate("ADMIN"), ac.DeleteArticle)
 }

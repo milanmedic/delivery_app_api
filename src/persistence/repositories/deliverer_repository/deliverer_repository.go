@@ -1,6 +1,7 @@
 package deliverer_repository
 
 import (
+	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	"delivery_app_api.mmedic.com/m/v2/src/persistence/database/sql_db_impls/deliverer_sql_db"
 )
@@ -27,4 +28,8 @@ func (dr *DelivererRepository) UpdateProperty(property string, value interface{}
 
 func (dr *DelivererRepository) Update(d *models.Deliverer) (bool, error) {
 	return dr.db.Update(d)
+}
+
+func (dr *DelivererRepository) GetAll() ([]dto.DeliverersProfileDto, error) {
+	return dr.db.GetAll()
 }

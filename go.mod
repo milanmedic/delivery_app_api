@@ -12,6 +12,8 @@ require (
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 )
 
+require github.com/julienschmidt/sse v0.0.0-20190921213156-72db694fe9e6 // indirect
+
 require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/sse v0.1.0 // indirect

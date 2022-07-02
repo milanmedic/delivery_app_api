@@ -10,4 +10,5 @@ type AddrServicer interface {
 	CreateAddress(a dto.AddressInputDto) (int, error)
 	GetAddr(a dto.AddressInputDto) (*models.Address, error)
 	GetUserAddress(userId string) (*dto.AddressOutputDto, error)
+	ValidateAddress(city, postfix, street string, streetNum int) error
 }

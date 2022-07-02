@@ -13,4 +13,6 @@ type OrderDber interface {
 	GetOrderStatus(id string) (string, error)
 	UpdateProperty(property string, value interface{}, id string) error
 	GetAllOrders(deliveryStatus string, accepted ...string) ([]models.Order, error)
+	GetOrder(id string) (*models.Order, error)
+	GetOrdersByDelivererId(delivererID string) ([]models.Order, error)
 }

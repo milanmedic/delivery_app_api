@@ -33,7 +33,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// TODO: GO through the code and refactor for concurrency
 func main() {
 	//**************************************************************************
 	// DATABASE CREATION

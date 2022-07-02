@@ -4,6 +4,7 @@ import (
 	"delivery_app_api.mmedic.com/m/v2/src/dto"
 	"delivery_app_api.mmedic.com/m/v2/src/models"
 	addr_repository "delivery_app_api.mmedic.com/m/v2/src/persistence/repositories/addr_repository"
+	"delivery_app_api.mmedic.com/m/v2/src/utils/validations"
 )
 
 type AddrService struct {
@@ -28,4 +29,25 @@ func (as *AddrService) GetById(id string) (*models.Address, error) {
 
 func (as *AddrService) GetUserAddress(userId string) (*dto.AddressOutputDto, error) {
 	return as.repository.GetUserAddress(userId)
+}
+
+func (as *AddrService) ValidateAddress(city, postfix, street string, streetNum int) error {
+	err := validations.ValidateCity(city)
+	if err != nil {
+		return err
+	}
+	err = validations.ValidatePostfix(postfix)
+	if err != nil {
+		return err
+	}
+	err = validations.ValidateStreetNum(streetNum)
+	if err != nil {
+		return err
+	}
+	err = validations.ValidateStreet(street)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

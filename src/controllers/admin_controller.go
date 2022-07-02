@@ -30,105 +30,6 @@ func CreateAdminController(as services.AdminServicer, cs customer_service.Custom
 	return &AdminController{adminService: as, customerService: cs, addrService: ads, delivererService: ds}
 }
 
-func (ac *AdminController) VerifyCustomer(c *gin.Context) {
-
-	customerID := c.Query("customerID")
-
-	customer, err := ac.customerService.GetBy("id", customerID)
-	if err != nil {
-		c.Error(fmt.Errorf("Error while retrieving the customer info. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if customer == nil {
-		c.Status(http.StatusNotFound)
-		return
-	}
-
-	if strings.Compare(customer.VerificationStatus, "VERIFIED") == 0 {
-		c.String(http.StatusBadRequest, "Customer already verified")
-		return
-	}
-
-	ac.customerService.UpdateProperty("verification_status", "VERIFIED", customerID)
-	if err != nil {
-		c.Error(fmt.Errorf("Error while verifying customer. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	mail := mailing_service.CreateEmail(customer.Email, "Account Validation Status", "Your account has been validated.")
-	err = mail.SendMail()
-	if err != nil {
-		c.Error(fmt.Errorf("Error while sending the verification email. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	c.Status(http.StatusOK)
-	return
-}
-
-func (ac *AdminController) AddDeliverer(c *gin.Context) {
-	var delivererDto dto.DelivererInputDto
-	err := c.BindJSON(&delivererDto)
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	err = ac.delivererService.ValidateDelivererDataInput(delivererDto)
-	if err != nil {
-		c.Error(fmt.Errorf("Error while validating input. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	var addrId int
-	addr, err := ac.addrService.GetAddr(*delivererDto.Address)
-	if err != nil {
-		c.Error(fmt.Errorf("Error while searching for address. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if addr == nil {
-		addrId, err = ac.addrService.CreateAddress(*delivererDto.Address)
-		if err != nil {
-			c.Error(fmt.Errorf("Error while creating an address. \nReason: %s", err.Error()))
-			c.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-		delivererDto.Address.Id = addrId
-	} else {
-		delivererDto.Address.Id = addr.Id
-	}
-
-	exists, err := ac.delivererService.Exists(delivererDto.Email)
-	if err != nil {
-		c.Error(fmt.Errorf("Error while checking for a customer. \nReason: %s", err.Error()))
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if exists {
-		c.String(http.StatusBadRequest, "User with the provided email already exists")
-		return
-	}
-
-	if !exists {
-		err = ac.delivererService.AddDeliverer(delivererDto)
-		if err != nil {
-			c.Error(fmt.Errorf("Error while creating a customer. \nReason: %s", err.Error()))
-			c.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	c.Status(http.StatusCreated)
-	return
-}
-
 func (ac *AdminController) VerifyDeliverer(c *gin.Context) {
 	delivererID := c.Query("delivererID")
 
@@ -163,8 +64,7 @@ func (ac *AdminController) VerifyDeliverer(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Status(http.StatusOK)
-	return
+	c.JSON(http.StatusOK, "Verified")
 }
 
 func (ac *AdminController) AdminLogin(c *gin.Context) {
@@ -283,4 +183,14 @@ func (ac *AdminController) UpdateAdmin(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 	return
+}
+
+func (ac *AdminController) GetAllDeliverers(c *gin.Context) {
+	deliverers, err := ac.delivererService.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, deliverers)
 }

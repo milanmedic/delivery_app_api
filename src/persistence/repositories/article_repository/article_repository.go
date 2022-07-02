@@ -6,10 +6,10 @@ import (
 )
 
 type ArticleRepository struct {
-	db *article_sql_db.ArticleDb
+	db article_sql_db.ArticleDber
 }
 
-func CreateArticleRepository(db *article_sql_db.ArticleDb) *ArticleRepository {
+func CreateArticleRepository(db article_sql_db.ArticleDber) *ArticleRepository {
 	return &ArticleRepository{db: db}
 }
 
@@ -31,4 +31,8 @@ func (ac *ArticleRepository) UpdateProperty(property string, value interface{}, 
 
 func (ac *ArticleRepository) DecrementQuantity(value int, id int) error {
 	return ac.db.DecrementQuantity(value, id)
+}
+
+func (ac *ArticleRepository) DeleteArticle(id int) error {
+	return ac.db.DeleteArticle(id)
 }

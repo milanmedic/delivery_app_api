@@ -18,4 +18,8 @@ func SetupCustomerRoutes(router *gin.Engine, uc *controllers.CustomerController)
 
 	router.GET("/customer", authentication_utils.Authenticate("CUSTOMER"), uc.GetCustomerInfo)
 	router.PUT("/customer", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomer)
+
+	router.PATCH("/customer", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomerProperty)
+	router.PATCH("/customer/password", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomerPassword)
+	router.PATCH("/customer/address", authentication_utils.Authenticate("CUSTOMER"), uc.UpdateCustomerAddress)
 }

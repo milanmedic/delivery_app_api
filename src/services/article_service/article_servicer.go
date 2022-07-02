@@ -11,4 +11,5 @@ type ArticleServicer interface {
 	GetAll() ([]*models.Article, error)
 	UpdateProperty(property string, value interface{}, id int) error
 	DecrementQuantity(value int, id int) error
+	DeleteArticle(id int) error
 }
